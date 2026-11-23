@@ -10,11 +10,11 @@ try {
   const page=await browser.newPage({viewport,deviceScaleFactor:1});
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(process.env.TEST_URL||'http://localhost:5173/',{waitUntil:'networkidle'});
-  await page.waitForFunction(()=>window.__birthday?.snapshot().loadedPhotos===19,null,{timeout:45000});
+  await page.waitForFunction(()=>window.__birthday?.snapshot().loadedPhotos===20,null,{timeout:45000});
   await mkdir('test-results',{recursive:true});
   await page.screenshot({path:`test-results/cake-${viewport.width}.png`});
   const initial=await page.evaluate(()=>window.__birthday.snapshot());
-  assert.equal(initial.photoCount,19);assert.equal(initial.target,0);
+  assert.equal(initial.photoCount,20);assert.equal(initial.target,0);
   const box=await page.locator('.scene').boundingBox();
   const heading=await page.locator('.heading').boundingBox();
   const controls=await page.locator('.controls').boundingBox();
@@ -38,7 +38,7 @@ try {
   assert.ok(Math.abs(await page.evaluate(()=>window.__birthday.snapshot().yaw))>.2);
   await page.mouse.click(viewport.width/2,60);assert.equal(await page.getByTestId('toggle').getAttribute('aria-expanded'),'true');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-  results.push({viewport,photos:19,loaded:19,fullExpansion:true,photoViewer:true,rapidReversal:true,drag:true,noOverlap:true});await page.close();
+  results.push({viewport,photos:20,loaded:20,fullExpansion:true,photoViewer:true,rapidReversal:true,drag:true,noOverlap:true});await page.close();
  }
  assert.deepEqual(errors,[]);await writeFile('test-results/browser-report.json',JSON.stringify({date:'2026-11-14',results,errors},null,2));console.log(JSON.stringify({results,errors}));
 } finally {await browser.close();}

@@ -1,0 +1,20 @@
+import {createRequire} from 'node:module';
+import assert from 'node:assert/strict';
+const {chromium}=createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE||'playwright');
+const browser=await chromium.launch({headless:true,channel:'chrome'});
+try{
+ const page=await browser.newPage({viewport:{width:390,height:844}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(process.env.TEST_URL||'http://localhost:5173/',{waitUntil:'networkidle'});
+ await page.getByTestId('toggle').click();await page.waitForTimeout(3000);
+ assert.ok((await page.locator('.moment-label').innerText()).includes('20'));
+ const box=await page.locator('.scene').boundingBox();
+ await page.mouse.click(box.x+box.width*.8225,box.y+box.height*.844);
+ await page.getByRole('dialog').waitFor();
+ await page.waitForFunction(()=>document.querySelector('.large-photo')?.naturalWidth===1282);
+ assert.ok((await page.locator('.large-photo').getAttribute('src')).includes('/20.jpg'));
+ assert.equal(await page.locator('.memory-date').innerText(),'20');
+ assert.equal(await page.locator('.viewer-footer p').innerText(),'你的每一个生日对你对我都有特殊的意义，生日快乐～');
+ await page.waitForTimeout(1300);await page.screenshot({path:'test-results/last-photo-20.png'});
+ await page.getByRole('button',{name:'下一张照片'}).click();assert.equal(await page.locator('.memory-date').innerText(),'01');
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({count:20,lastPhoto:true,fullResolution:true,captionExact:true,wrapToFirst:true,errors}));
+}finally{await browser.close();}

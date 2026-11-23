@@ -83,7 +83,7 @@ export default function App() {
     {photo && <div className={`memory-dialog ${closing ? 'closing' : ''}`} ref={dialog} role="dialog" aria-modal="true" aria-label={`${photo.label}的生日回忆`} onClick={e => { e.stopPropagation(); if (e.target === e.currentTarget) close(); }}>
       <button ref={closeButton} className="close-button" onClick={close} aria-label="关闭照片"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" strokeWidth="1.4"/></svg></button>
       <span className="viewer-kicker">A MOMENT TO KEEP</span>
-      <div className="photo-arrival" key={photo.id}><div className="photo-sway"><img className="large-photo" src={photo.src} alt={`${photo.label}：${photo.caption}`} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = config.placeholder; }}/></div></div>
+      <div className="photo-arrival" key={photo.id}><div className="photo-sway"><img className={`large-photo ${photo.frame ? 'new-polaroid' : ''}`} src={photo.src} alt={`${photo.label}：${photo.caption}`} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = config.placeholder; }}/></div></div>
       <div className="viewer-footer"><span className="memory-date">{String(selected! + 1).padStart(2, '0')}</span><p>{photo.caption}</p><div className="viewer-navigation"><button onClick={() => setSelected((selected! - 1 + photos.length) % photos.length)} aria-label="上一张照片"><Arrow direction="left"/></button><span>{String(selected! + 1).padStart(2, '0')} <i>/</i> {String(photos.length).padStart(2, '0')}</span><button onClick={() => setSelected((selected! + 1) % photos.length)} aria-label="下一张照片"><Arrow/></button></div></div>
     </div>}
   </main>;

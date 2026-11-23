@@ -151,7 +151,20 @@ export class CakeScene {
       const rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(-.07, Math.PI / 2 - a, (i % 3 - 1) * .12));
       const card: Card = { mesh, home: new THREE.Vector3(Math.cos(a) * r, y, Math.sin(a) * r), scatter: new THREE.Vector3(), rotation, targetRotation: this.camera.quaternion.clone(), phase: (i % 5) / 5, homeScale: height, scatterScale: 1, photo };
       this.cards.push(card); this.scene.add(mesh);
-      const finish = (texture: THREE.Texture) => { if (this.disposed) { texture.dispose(); return; } texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy()); material.map = texture; material.needsUpdate = true; this.loaded++; this.onReady(this.loaded); };
+      const finish = (texture: THREE.Texture) => { if (this.disposed) { texture.dispose(); return; } if (photo.frame) {
+        const canvas = document.createElement('canvas'); canvas.width = 800; canvas.height = 1150;
+        const context = canvas.getContext('2d')!;
+        context.fillStyle = '#fffdf9'; context.fillRect(0, 0, 800, 1150);
+        const img = texture.image as HTMLImageElement;
+        const scale = Math.min(752 / img.width, 1002 / img.height);
+        const w = img.width * scale, h = img.height * scale;
+        context.drawImage(img, 24 + (752 - w) / 2, 24 + (1002 - h) / 2, w, h);
+        context.fillStyle = '#383033'; context.font = '24px "PingFang SC", sans-serif'; context.textAlign = 'center';
+        context.fillText('你的每一个生日对你对我都有特殊的意义，', 400, 1073);
+        context.fillText('生日快乐～', 400, 1115);
+        texture.dispose(); texture = new THREE.CanvasTexture(canvas);
+      }
+      texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy()); material.map = texture; material.needsUpdate = true; this.loaded++; this.onReady(this.loaded); };
       // A brief network failure must not permanently replace a real photo with a placeholder.
       const candidates = [photo.thumbnail || photo.src, photo.thumbnail || photo.src, photo.src];
       const attempt = (index: number) => {

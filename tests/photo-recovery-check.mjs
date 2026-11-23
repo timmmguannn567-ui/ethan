@@ -14,7 +14,7 @@ try {
  await page.unroute('**/01-thumb.webp*');
  const list=JSON.parse(await readFile(new URL('../src/photos.json',import.meta.url),'utf8'));
  const images=await page.evaluate(async paths=>Promise.all(paths.map(path=>new Promise(resolve=>{const img=new Image();img.onload=()=>resolve({path,ok:img.naturalWidth>0});img.onerror=()=>resolve({path,ok:false});img.src=new URL(path.replace(/^\//,''),location.href).href;}))),list.flatMap(p=>[p.src,p.thumbnail]));
- assert.equal(images.length,38);assert.ok(images.every(p=>p.ok),JSON.stringify(images.filter(p=>!p.ok)));
+ assert.equal(images.length,40);assert.ok(images.every(p=>p.ok),JSON.stringify(images.filter(p=>!p.ok)));
  await page.getByTestId('toggle').click();await page.waitForTimeout(2600);await page.screenshot({path:'test-results/photo-recovery.png'});
  console.log(JSON.stringify({thumbnailFailures:blocked,originalRecovered,decodedPhotos:images.length,newPage:url}));
 }finally{await browser.close();}
