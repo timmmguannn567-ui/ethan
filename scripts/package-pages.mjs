@@ -1,7 +1,12 @@
-import {cp,mkdir,writeFile,rm} from 'node:fs/promises';
+import {cp,mkdir,writeFile,rm,readFile} from 'node:fs/promises';
 await rm(new URL('../docs',import.meta.url),{recursive:true,force:true});
 await mkdir(new URL('../docs',import.meta.url),{recursive:true});
 await cp(new URL('../dist',import.meta.url),new URL('../docs',import.meta.url),{recursive:true});
 await writeFile(new URL('../docs/.nojekyll',import.meta.url),'');
-await cp(new URL('../docs/index.html',import.meta.url),new URL('../docs/birthday.html',import.meta.url));
+const embedded=JSON.parse(await readFile(new URL('../public/photo-previews.json',import.meta.url),'utf8'));
+const indexPath=new URL('../docs/index.html',import.meta.url);
+const html=(await readFile(indexPath,'utf8')).replace('</head>',`<script id="birthday-photos" type="application/json">${JSON.stringify(embedded)}</script></head>`);
+await writeFile(indexPath,html);
+await writeFile(new URL('../docs/birthday.html',import.meta.url),html);
+await writeFile(new URL('../docs/wechat.html',import.meta.url),html);
 console.log('GitHub Pages package ready: docs/ (birthday.html included)');

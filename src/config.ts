@@ -1,6 +1,7 @@
 import photoList from './photos.json';
 const localAsset = (path: string) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
-const photos = photoList.map(photo => ({...photo, src:localAsset(photo.src), thumbnail:photo.thumbnail ? localAsset(photo.thumbnail) : undefined}));
+const embedded: Record<string,string> = JSON.parse(document.getElementById('birthday-photos')?.textContent || '{}');
+const photos = photoList.map(photo => ({...photo, src:localAsset(photo.src), thumbnail:embedded[photo.id] || localAsset(photo.thumbnail || photo.src)}));
 export interface Photo { id: string; src: string; thumbnail?: string; label: string; caption: string; aspect: number; frame?: boolean }
 /** All personal content and visual tuning live here. Local URLs also work offline after loading. */
 export const birthdayConfig = {

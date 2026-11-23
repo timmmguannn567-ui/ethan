@@ -170,7 +170,7 @@ export class CakeScene {
       const attempt = (index: number) => {
         if (this.disposed) return;
         const url = new URL(candidates[index], document.baseURI);
-        if (index > 0) url.searchParams.set('retry', String(index));
+        if (index > 0 && url.protocol !== 'data:') url.searchParams.set('retry', String(index));
         loader.load(url.href, finish, undefined, () => {
           if (this.disposed) return;
           if (index + 1 < candidates.length) {

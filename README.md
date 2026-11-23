@@ -91,3 +91,5 @@ npm run build:pages
 首次点击页面后淡入原创 Web Audio 氛围配乐：缓慢和弦、钟琴琶音和回声。右侧圆形声波按钮可暂停／开启，切到后台暂停。无需下载音源或付费服务。音量和默认开关在 `src/config.ts` 的 `music` 中配置。浏览器通常禁止未交互自动播放。
 
 新增第 20 张合照 `public/photos/20.jpg`，保留原始图像；`frame: true` 通过网页 Canvas 和 CSS 添加拍立得边框，排列在照片列表最后。
+
+微信兼容版：生产页面内嵌 `public/photo-previews.json` 中的 20 张 JPEG 预览，照片纹理不依赖额外网络请求。放大照片先显示内嵌预览，高清原图加载成功后替换。入口 `wechat.html`、`birthday.html` 和首页使用相同内容。

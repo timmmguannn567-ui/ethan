@@ -9,6 +9,12 @@ const fallback: Photo = { id: 'memory', src: config.placeholder, label: '留给�
 const photos = config.photos.length ? config.photos : [fallback];
 function Arrow({ direction = 'right' }: { direction?: 'left' | 'right' }) { return <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ transform: direction === 'left' ? 'rotate(180deg)' : undefined }}><path d="m9 5 7 7-7 7M4 12h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>; }
 
+function MemoryPhoto({ photo }: { photo: Photo }) {
+  const [src,setSrc]=useState(photo.thumbnail || photo.src);
+  useEffect(()=>{let active=true;setSrc(photo.thumbnail || photo.src);const full=new Image();full.onload=()=>{if(active)setSrc(photo.src);};full.src=photo.src;return()=>{active=false;full.onload=null;};},[photo]);
+  return <img className={`large-photo ${photo.frame ? 'new-polaroid' : ''}`} src={src} alt={`${photo.label}：${photo.caption}`} onError={()=>setSrc(photo.thumbnail || config.placeholder)}/>;
+}
+
 
 export default function App() {
   const host = useRef<HTMLDivElement>(null); const engine = useRef<CakeScene | null>(null);
@@ -68,7 +74,7 @@ export default function App() {
           {config.age !== null && <span className="age">{config.age} 岁 · 生日快乐</span>}
           <p className="dedication">{config.dedication}</p>
         </header>
-        <div className="scene" ref={host} onClick={sceneClick} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerLeave={()=>engine.current?.setParallax(0,0)} onPointerCancel={() => { drag.current.down = false; }} onLostPointerCapture={() => { drag.current.down = false; }} />
+        <div className="scene" data-loaded={loaded} ref={host} onClick={sceneClick} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerLeave={()=>engine.current?.setParallax(0,0)} onPointerCancel={() => { drag.current.down = false; }} onLostPointerCapture={() => { drag.current.down = false; }} />
         {!ready && <div className="loading">正在点亮你的生日…</div>}
         {message && <div className="scene-message" role="status">{message}<button onClick={() => location.reload()}>重新加载</button></div>}
         {failed && <div className="fallback"><p>此设备暂时无法显示 3D，仍可轻触照片查看祝福。</p>{photos.map((p,i)=><button key={p.id} onClick={e=>{e.stopPropagation();openPhoto(i);}}><img src={p.thumbnail||p.src} alt={p.label}/></button>)}</div>}
@@ -83,7 +89,7 @@ export default function App() {
     {photo && <div className={`memory-dialog ${closing ? 'closing' : ''}`} ref={dialog} role="dialog" aria-modal="true" aria-label={`${photo.label}的生日回忆`} onClick={e => { e.stopPropagation(); if (e.target === e.currentTarget) close(); }}>
       <button ref={closeButton} className="close-button" onClick={close} aria-label="关闭照片"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" strokeWidth="1.4"/></svg></button>
       <span className="viewer-kicker">A MOMENT TO KEEP</span>
-      <div className="photo-arrival" key={photo.id}><div className="photo-sway"><img className={`large-photo ${photo.frame ? 'new-polaroid' : ''}`} src={photo.src} alt={`${photo.label}：${photo.caption}`} onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = config.placeholder; }}/></div></div>
+      <div className="photo-arrival" key={photo.id}><div className="photo-sway"><MemoryPhoto key={photo.id} photo={photo}/></div></div>
       <div className="viewer-footer"><span className="memory-date">{String(selected! + 1).padStart(2, '0')}</span><p>{photo.caption}</p><div className="viewer-navigation"><button onClick={() => setSelected((selected! - 1 + photos.length) % photos.length)} aria-label="上一张照片"><Arrow direction="left"/></button><span>{String(selected! + 1).padStart(2, '0')} <i>/</i> {String(photos.length).padStart(2, '0')}</span><button onClick={() => setSelected((selected! + 1) % photos.length)} aria-label="下一张照片"><Arrow/></button></div></div>
     </div>}
   </main>;
