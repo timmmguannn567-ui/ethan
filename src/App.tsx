@@ -70,7 +70,7 @@ export default function App() {
         </header>
         <div className="scene" ref={host} onClick={sceneClick} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerLeave={()=>engine.current?.setParallax(0,0)} onPointerCancel={() => { drag.current.down = false; }} onLostPointerCapture={() => { drag.current.down = false; }} />
         {!ready && <div className="loading">正在点亮你的生日…</div>}
-        {message && <div className="scene-message" role="status">{message}<button onClick={() => location.reload()}>重新点亮</button></div>}
+        {message && <div className="scene-message" role="status">{message}<button onClick={() => location.reload()}>重新加载</button></div>}
         {failed && <div className="fallback"><p>此设备暂时无法显示 3D，仍可轻触照片查看祝福。</p>{photos.map((p,i)=><button key={p.id} onClick={e=>{e.stopPropagation();openPhoto(i);}}><img src={p.thumbnail||p.src} alt={p.label}/></button>)}</div>}
         <footer className="controls" onClick={e=>e.stopPropagation()}>
           <p className="moment-label">{expanded ? `${photos.length} 个瞬间，每一个都关于你` : '把漫天星光，聚成你的生日'}</p>

@@ -152,7 +152,25 @@ export class CakeScene {
       const card: Card = { mesh, home: new THREE.Vector3(Math.cos(a) * r, y, Math.sin(a) * r), scatter: new THREE.Vector3(), rotation, targetRotation: this.camera.quaternion.clone(), phase: (i % 5) / 5, homeScale: height, scatterScale: 1, photo };
       this.cards.push(card); this.scene.add(mesh);
       const finish = (texture: THREE.Texture) => { if (this.disposed) { texture.dispose(); return; } texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy()); material.map = texture; material.needsUpdate = true; this.loaded++; this.onReady(this.loaded); };
-      loader.load(photo.thumbnail || photo.src, finish, undefined, () => loader.load(config.placeholder, finish, undefined, () => { this.loaded++; this.onReady(this.loaded); }));
+      // A brief network failure must not permanently replace a real photo with a placeholder.
+      const candidates = [photo.thumbnail || photo.src, photo.thumbnail || photo.src, photo.src];
+      const attempt = (index: number) => {
+        if (this.disposed) return;
+        const url = new URL(candidates[index], document.baseURI);
+        if (index > 0) url.searchParams.set('retry', String(index));
+        loader.load(url.href, finish, undefined, () => {
+          if (this.disposed) return;
+          if (index + 1 < candidates.length) {
+            window.setTimeout(() => attempt(index + 1), 600 * (index + 1));
+          } else {
+            this.onError('部分照片暂时未能加载，请轻点重新加载。');
+            loader.load(config.placeholder, finish, undefined, () => {
+              if (!this.disposed) { this.loaded++; this.onReady(this.loaded); }
+            });
+          }
+        });
+      };
+      attempt(0);
     });
   }
   private resize() {
