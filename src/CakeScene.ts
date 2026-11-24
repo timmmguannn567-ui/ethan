@@ -151,7 +151,16 @@ export class CakeScene {
       const rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(-.07, Math.PI / 2 - a, (i % 3 - 1) * .12));
       const card: Card = { mesh, home: new THREE.Vector3(Math.cos(a) * r, y, Math.sin(a) * r), scatter: new THREE.Vector3(), rotation, targetRotation: this.camera.quaternion.clone(), phase: (i % 5) / 5, homeScale: height, scatterScale: 1, photo };
       this.cards.push(card); this.scene.add(mesh);
-      const finish = (texture: THREE.Texture) => { if (this.disposed) { texture.dispose(); return; } if (photo.frame) {
+      const finish = (texture: THREE.Texture) => { if (this.disposed) { texture.dispose(); return; } if (photo.captionOverlay) {
+        const canvas = document.createElement('canvas'); canvas.width = 800; canvas.height = Math.round(800 / photo.aspect);
+        const context = canvas.getContext('2d')!;
+        context.drawImage(texture.image, 0, 0, canvas.width, canvas.height);
+        context.fillStyle = '#fffdf9'; context.fillRect(0, canvas.height * .81, 800, canvas.height * .19);
+        context.fillStyle = '#383033'; context.font = '36px KaiTi, STKaiti, serif'; context.textAlign = 'center';
+        const lines = photo.caption.split('，');
+        lines.forEach((line, i) => context.fillText(line + (i < lines.length - 1 ? '，' : ''), 400, canvas.height * .88 + i * 55));
+        texture.dispose(); texture = new THREE.CanvasTexture(canvas);
+      } else if (photo.frame) {
         const canvas = document.createElement('canvas'); canvas.width = 800; canvas.height = 1150;
         const context = canvas.getContext('2d')!;
         context.fillStyle = '#fffdf9'; context.fillRect(0, 0, 800, 1150);

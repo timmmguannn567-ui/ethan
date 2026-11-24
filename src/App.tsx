@@ -13,6 +13,7 @@ function MemoryPhoto({ photo }: { photo: Photo }) {
   const [src,setSrc]=useState(photo.thumbnail || photo.src);
   useEffect(()=>{let active=true;setSrc(photo.thumbnail || photo.src);const full=new Image();full.onload=()=>{if(active)setSrc(photo.src);};full.src=photo.src;return()=>{active=false;full.onload=null;};},[photo]);
   const image = <img className="large-photo" src={src} alt={`${photo.label}：${photo.caption}`} onError={()=>setSrc(photo.thumbnail || config.placeholder)}/>;
+  if (photo.captionOverlay) return <figure className="caption-replacement" style={{aspectRatio:photo.aspect}}>{image}<figcaption><span>{photo.caption.split('，').map((line,i,lines)=><span className="caption-line" key={i}>{line}{i < lines.length-1 ? '，' : ''}</span>)}</span></figcaption></figure>;
   return photo.frame ? <figure className="framed-photo">{image}<figcaption>{photo.caption}</figcaption></figure> : image;
 }
 

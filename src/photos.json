@@ -148,15 +148,16 @@
     "src": "/photos/19.webp",
     "thumbnail": "/photos/19-thumb.webp",
     "label": "爱你的当下",
-    "caption": "生日快乐，爱你的每一个当下，也期待陪你的每一个明天。",
-    "aspect": 0.75
+    "caption": "愿我们把平凡的日子，过成值得珍藏的回忆。",
+    "aspect": 0.75,
+    "captionOverlay": true
   },
   {
     "id": "20",
     "src": "/photos/20.jpg",
     "thumbnail": "/photos/20.jpg",
     "label": "每一个生日，都有你我",
-    "caption": "你的每一个生日对你对我都有特殊的意义，生日快乐～",
+    "caption": "生日快乐，爱你的每一个当下，也期待陪你的每一个明天。",
     "aspect": 0.6956521739130435,
     "frame": true
   }
