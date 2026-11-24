@@ -93,3 +93,5 @@ npm run build:pages
 新增第 20 张合照 `public/photos/20.jpg`，保留原始图像；`frame: true` 通过网页 Canvas 和 CSS 添加拍立得边框，排列在照片列表最后。
 
 微信兼容版：生产页面内嵌 `public/photo-previews.json` 中的 20 张 JPEG 预览，照片纹理不依赖额外网络请求。放大照片先显示内嵌预览，高清原图加载成功后替换。入口 `wechat.html`、`birthday.html` 和首页使用相同内容。
+
+第19、20张文案使用内嵌 Ma Shan Zheng 毛笔手写字体，并等待字体加载完成后绘制三维照片。字体仅包含所需文字，许可证见 public/fonts/OFL-MaShanZheng.txt。

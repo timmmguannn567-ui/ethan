@@ -156,7 +156,7 @@ export class CakeScene {
         const context = canvas.getContext('2d')!;
         context.drawImage(texture.image, 0, 0, canvas.width, canvas.height);
         context.fillStyle = '#fffdf9'; context.fillRect(0, canvas.height * .81, 800, canvas.height * .19);
-        context.fillStyle = '#383033'; context.font = '36px KaiTi, STKaiti, serif'; context.textAlign = 'center';
+        context.fillStyle = '#383033'; context.font = '44px BirthdayHandwriting, cursive'; context.textAlign = 'center';
         const lines = photo.caption.split('，');
         lines.forEach((line, i) => context.fillText(line + (i < lines.length - 1 ? '，' : ''), 400, canvas.height * .88 + i * 55));
         texture.dispose(); texture = new THREE.CanvasTexture(canvas);
@@ -168,15 +168,15 @@ export class CakeScene {
         const scale = Math.min(752 / img.width, 1002 / img.height);
         const w = img.width * scale, h = img.height * scale;
         context.drawImage(img, 24 + (752 - w) / 2, 24 + (1002 - h) / 2, w, h);
-        context.fillStyle = '#383033'; context.font = '24px "PingFang SC", sans-serif'; context.textAlign = 'center';
+        context.fillStyle = '#383033'; context.font = '40px BirthdayHandwriting, cursive'; context.textAlign = 'center';
         const lines: string[] = []; let line = '';
         for (const char of photo.caption) {
           if (context.measureText(line + char).width > 730) { lines.push(line); line = ''; }
           line += char;
-          if (char === '，') { lines.push(line); line = ''; }
+          if (char === '，' && line.length > 5) { lines.push(line); line = ''; }
         }
         if (line) lines.push(line);
-        lines.forEach((text, i) => context.fillText(text, 400, 1073 + i * 36));
+        lines.forEach((text, i) => context.fillText(text, 400, 1073 + i * 48));
         texture.dispose(); texture = new THREE.CanvasTexture(canvas);
       }
       texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy()); material.map = texture; material.needsUpdate = true; this.loaded++; this.onReady(this.loaded); };

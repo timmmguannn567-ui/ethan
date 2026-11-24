@@ -14,7 +14,7 @@ function MemoryPhoto({ photo }: { photo: Photo }) {
   useEffect(()=>{let active=true;setSrc(photo.thumbnail || photo.src);const full=new Image();full.onload=()=>{if(active)setSrc(photo.src);};full.src=photo.src;return()=>{active=false;full.onload=null;};},[photo]);
   const image = <img className="large-photo" src={src} alt={`${photo.label}：${photo.caption}`} onError={()=>setSrc(photo.thumbnail || config.placeholder)}/>;
   if (photo.captionOverlay) return <figure className="caption-replacement" style={{aspectRatio:photo.aspect}}>{image}<figcaption><span>{photo.caption.split('，').map((line,i,lines)=><span className="caption-line" key={i}>{line}{i < lines.length-1 ? '，' : ''}</span>)}</span></figcaption></figure>;
-  return photo.frame ? <figure className="framed-photo">{image}<figcaption>{photo.caption}</figcaption></figure> : image;
+  return photo.frame ? <figure className="framed-photo">{image}<figcaption><span>{photo.caption.replace('当下，','当下，\n').split('\n').map((line,i)=><span className="caption-line" key={i}>{line}</span>)}</span></figcaption></figure> : image;
 }
 
 
@@ -32,10 +32,13 @@ export default function App() {
   const drag = useRef({ down: false, x: 0, y: 0, travel: 0, id: -1 });
   useEffect(() => {
     if (!host.current) return;
-    let scene: CakeScene | undefined;
+    let scene: CakeScene | undefined; let cancelled=false;
+    const initialize=()=>{if(cancelled||!host.current)return;
     try { scene = new CakeScene(host.current, photos, setLoaded, setMessage); engine.current = scene; setReady(true); if (import.meta.env.DEV) window.__birthday = { snapshot: () => scene!.diagnostics() }; }
     catch (error) { console.error('3D scene initialization:', error); setFailed(true); setReady(true); }
-    return () => { scene?.dispose(); engine.current = null; delete window.__birthday; };
+    };
+    document.fonts.load('24px BirthdayHandwriting').then(initialize,initialize);
+    return () => { cancelled=true; scene?.dispose(); engine.current = null; delete window.__birthday; };
   }, []);
   useEffect(() => { engine.current?.setExpanded(expanded); }, [expanded]);
   const openPhoto = (index: number) => { lastFocus.current=document.activeElement as HTMLElement; setSelected(index); };
