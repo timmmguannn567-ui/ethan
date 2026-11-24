@@ -14,7 +14,8 @@ try{
  assert.ok((await page.locator('.large-photo').getAttribute('src')).includes('/20.jpg'));
  assert.equal(await page.locator('.memory-date').innerText(),'20');
  assert.equal(await page.locator('.viewer-footer p').innerText(),'你的每一个生日对你对我都有特殊的意义，生日快乐～');
+ assert.equal(await page.locator('.framed-photo figcaption').innerText(),'你的每一个生日对你对我都有特殊的意义，生日快乐～');
  await page.waitForTimeout(1300);await page.screenshot({path:'test-results/last-photo-20.png'});
- await page.getByRole('button',{name:'下一张照片'}).click();assert.equal(await page.locator('.memory-date').innerText(),'01');
+ await page.getByRole('button',{name:'上一张照片'}).click();assert.equal(await page.locator('.memory-date').innerText(),'19');assert.equal(await page.locator('.viewer-footer p').innerText(),'生日快乐，爱你的每一个当下，也期待陪你的每一个明天。');assert.equal(await page.locator('.framed-photo').count(),0);await page.getByRole('button',{name:'下一张照片'}).click();await page.getByRole('button',{name:'下一张照片'}).click();assert.equal(await page.locator('.memory-date').innerText(),'01');
  assert.deepEqual(errors,[]);console.log(JSON.stringify({count:20,lastPhoto:true,fullResolution:true,captionExact:true,wrapToFirst:true,errors}));
 }finally{await browser.close();}

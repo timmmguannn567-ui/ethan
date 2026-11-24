@@ -160,8 +160,14 @@ export class CakeScene {
         const w = img.width * scale, h = img.height * scale;
         context.drawImage(img, 24 + (752 - w) / 2, 24 + (1002 - h) / 2, w, h);
         context.fillStyle = '#383033'; context.font = '24px "PingFang SC", sans-serif'; context.textAlign = 'center';
-        context.fillText('你的每一个生日对你对我都有特殊的意义，', 400, 1073);
-        context.fillText('生日快乐～', 400, 1115);
+        const lines: string[] = []; let line = '';
+        for (const char of photo.caption) {
+          if (context.measureText(line + char).width > 730) { lines.push(line); line = ''; }
+          line += char;
+          if (char === '，') { lines.push(line); line = ''; }
+        }
+        if (line) lines.push(line);
+        lines.forEach((text, i) => context.fillText(text, 400, 1073 + i * 36));
         texture.dispose(); texture = new THREE.CanvasTexture(canvas);
       }
       texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy()); material.map = texture; material.needsUpdate = true; this.loaded++; this.onReady(this.loaded); };
