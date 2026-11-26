@@ -8,6 +8,14 @@ export interface Photo { id: string; src: string; thumbnail?: string; label: str
 export const birthdayConfig = {
   name: 'Cui Cui',
   age: null as number | null,
+  opening: {
+    enabled: true,
+    countdownBeatMs: 1350,
+    invitation: '有些相遇，让普通的日子开始发光。',
+    nameMessage: '宇宙那么大，很高兴遇见你。',
+    wishMessage: '愿你的心愿，都有温柔的回响。',
+    closingMessage: '你的每一个生日，\n都值得被认真珍藏。',
+  },
   title: ['Cui Cui', 'Happy Birthday'],
   dedication: '你的每一个生日对你对我都有特殊的意义，生日快乐～',
   wish: '愿你迎着阳光出发，走向自己喜欢的生活。',

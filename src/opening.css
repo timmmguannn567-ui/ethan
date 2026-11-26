@@ -1,0 +1,42 @@
+@import "./opening-font.css";
+.opening{position:fixed;inset:0;z-index:20;min-height:480px;overflow:hidden;background:#02030b;color:#efeafa;isolation:isolate;transition:opacity 1s ease,visibility 1s;touch-action:none}
+.opening--reveal{opacity:0;visibility:hidden;pointer-events:none}
+.opening-nebula{position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 24% 46%,#2d376629,transparent 50%),radial-gradient(ellipse at 78% 54%,#612e5e26,transparent 48%),radial-gradient(ellipse at 50% 92%,#16132d50,transparent 65%)}
+.opening-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.opening-frame{position:absolute;inset:16px;border:1px solid #b6b8e013;border-radius:25px;pointer-events:none}
+.opening-top{position:absolute;top:max(32px,env(safe-area-inset-top));left:32px;right:32px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.opening-top>span{font-size:9px;letter-spacing:1.8px;color:#b5b6d1}.opening-top i{font-style:normal;color:#e7bad3;margin:0 5px}.opening-top button{padding:8px 0 8px 10px;color:#adb1c8;background:transparent;font-size:12px}
+.opening-copy{position:absolute;top:15%;left:24px;right:24px;text-align:center;pointer-events:none;animation:opening-copy-in .8s both}
+.opening-eyebrow{font-size:9px;letter-spacing:2.2px;color:#9ca9c9;margin-bottom:20px}
+.opening h2{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-weight:400;font-size:clamp(27px,6.7vw,39px);line-height:1.6;letter-spacing:.13em;margin:0}
+.opening h2 span{color:#ffc5e1;margin-left:.16em;text-shadow:0 0 22px #ffacd825}
+.opening-subtitle{font-size:13px;color:#a3a2ba;margin-top:17px;letter-spacing:.1em;line-height:1.8}
+.opening .opening-small-title{font-size:clamp(20px,5vw,30px);letter-spacing:.1em;color:#ebdfef}
+.opening-bottom{position:absolute;left:24px;right:24px;bottom:max(95px,calc(env(safe-area-inset-bottom) + 72px));display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px;pointer-events:none}
+.opening-bottom button{pointer-events:auto}.opening-orbit-note{font-size:13px;letter-spacing:.08em;color:#bcb0c8}
+.opening-primary{position:relative;min-height:54px;min-width:220px;padding:15px 28px;border:1px solid #c4b0e26b;border-radius:40px;background:linear-gradient(115deg,#202f48db,#332139ed);box-shadow:inset 0 1px 0 #ffffff1c,0 0 35px #b89edb16;color:#ffe2ef;font-size:15px;letter-spacing:.1em;transition:transform .25s,box-shadow .25s}
+.opening-primary:hover{box-shadow:inset 0 1px 0 #ffffff28,0 0 38px #b89edb38;transform:translateY(-2px)}.opening-primary:active{transform:scale(.97)}.opening-primary span{color:#bfe3fa;margin-right:6px}
+.opening-hint{font-size:11px;color:#8d8ca8;letter-spacing:.08em}.opening-caption{font-size:15px;line-height:2;letter-spacing:.08em;color:#d0bfd7;max-width:325px;white-space:pre-line}
+.opening-sound{position:absolute;bottom:max(33px,env(safe-area-inset-bottom));left:34px;display:flex;align-items:center;gap:10px;background:none;color:#8c9ebb;font-size:11px;letter-spacing:.06em;padding:8px 0;min-height:32px}
+.opening-sound>span{display:flex;align-items:center;gap:3px;height:14px}.opening-sound i{width:2px;height:4px;background:#a9cee7;border-radius:1px}.opening-sound.is-playing i{height:12px;animation:opening-audio 1s calc(var(--i)*-.22s) infinite alternate}
+.opening-beats{display:flex;gap:12px}.opening-beats i{height:3px;width:24px;border-radius:3px;background:#57627b33;transition:background .5s,box-shadow .5s}.opening-beats .lit{background:#bbd7ef;box-shadow:0 0 14px #7aa5d676}
+.opening-announcement{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.opening-text-fallback{position:absolute;top:44%;width:100%;text-align:center;font-size:clamp(40px,11vw,100px);color:#ffd2e7}
+.opening--release .opening-copy,.opening--release .opening-bottom{animation:opening-copy-in .6s both}
+.experience--arriving{animation:cake-arrival 1.6s cubic-bezier(.16,1,.3,1) both}
+.moment-row{display:flex;align-items:center;justify-content:center;gap:12px}.replay-opening{font-size:10px;letter-spacing:.04em;color:#b7b5ce;background:none;border-bottom:1px solid #b7b5ce40;padding:4px 0}
+@keyframes opening-copy-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes opening-audio{to{height:3px;opacity:.5}}
+@keyframes cake-arrival{from{opacity:.15;transform:scale(.86);filter:blur(8px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
+@media(min-width:750px){.opening-copy{top:13%}.opening-bottom{bottom:12%}.opening-caption{max-width:480px}.opening-frame{inset:24px;border-radius:32px}.opening-top{top:45px;left:48px;right:48px}.opening-sound{left:48px;bottom:40px}}
+@media(max-height:700px){.opening-copy{top:14%}.opening-eyebrow{margin-bottom:12px;font-size:8px}.opening h2{font-size:25px;line-height:1.45}.opening-subtitle{margin-top:10px;font-size:12px}.opening-bottom{bottom:65px;gap:10px}.opening-orbit-note{font-size:11px}.opening-primary{min-height:46px;padding:12px 22px;font-size:14px}.opening-caption{font-size:13px;max-width:290px}.opening-hint{font-size:10px}.opening-sound{bottom:20px}.opening-top{top:24px;left:26px;right:26px}.opening-top>span{font-size:8px;letter-spacing:1px}.moment-row{gap:8px}}
+@media(prefers-reduced-motion:reduce){.opening,.opening-primary{transition:none}.experience--arriving,.opening-copy,.opening-sound.is-playing i{animation:none}}
+
+/* Softer, personal lettering scoped to the opening only. */
+.opening h2,.opening-subtitle,.opening-caption,.opening-orbit-note,.opening-primary{font-family:BirthdayOpening,'Fredoka','PingFang SC',sans-serif;font-weight:400;letter-spacing:.045em}
+.opening h2,.opening .opening-small-title{color:transparent;background:linear-gradient(115deg,#b8dcff 10%,#dcc3ff 44%,#ffc3dd 80%);background-clip:text;-webkit-background-clip:text;opacity:.88;text-shadow:none}
+.opening h2 span{color:transparent;background:linear-gradient(110deg,#ffc0dd,#efb6ee,#c0d3ff);background-clip:text;-webkit-background-clip:text;text-shadow:none}
+.opening-subtitle{color:#c3b5d7;opacity:.78;font-size:15px}.opening-orbit-note{color:#c9c0e3;opacity:.8;font-size:15px}
+.opening-caption{color:#e2c4e2;opacity:.84;font-size:17px}.opening-primary{color:#efcce4;font-size:17px;background:linear-gradient(115deg,#263751b8,#3a2847c9);border-color:#d1b2e35c}
+.opening--countdown .opening-caption{color:#bcd6ed}.opening--wish .opening-caption{color:#eec3da}.opening-eyebrow{color:#a6bbd7;opacity:.78}
+@media(max-height:700px){.opening-subtitle,.opening-orbit-note{font-size:13px}.opening-caption,.opening-primary{font-size:15px}}

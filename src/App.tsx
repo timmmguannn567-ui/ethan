@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
+import { Opening } from './Opening';
 import { CakeScene } from './CakeScene';
 import { CosmicBackdrop } from './CosmicBackdrop';
 import { birthdayAudio } from './audio';
@@ -30,6 +31,9 @@ function MemoryPhoto({ photo }: { photo: Photo }) {
 
 export default function App() {
   const host = useRef<HTMLDivElement>(null); const engine = useRef<CakeScene | null>(null);
+  const [opening, setOpening]=useState(config.opening.enabled);
+  const [arriving,setArriving]=useState(false);
+  const [openingKey,setOpeningKey]=useState(0);
   const [sound, setSound] = useState(false);
   const musicMuted = useRef(!config.music.enabled);
   useEffect(() => { const visibility=()=>birthdayAudio.visibility(); document.addEventListener('visibilitychange',visibility); return ()=>{document.removeEventListener('visibilitychange',visibility);birthdayAudio.dispose();}; }, []);
@@ -51,6 +55,11 @@ export default function App() {
     return () => { cancelled=true; scene?.dispose(); engine.current = null; delete window.__birthday; };
   }, []);
   useEffect(() => { engine.current?.setExpanded(expanded); }, [expanded]);
+  useEffect(() => {engine.current?.setPaused(opening && !arriving);},[opening,arriving,ready]);
+  const revealCake=()=>{setArriving(true);};
+  const finishOpening=()=>{setOpening(false);};
+  const replayOpening=()=>{setExpanded(false);setArriving(false);setOpeningKey(n=>n+1);setOpening(true);};
+  useEffect(()=>{if(!opening&&arriving){const id=setTimeout(()=>{setArriving(false);document.querySelector<HTMLButtonElement>('[data-testid=toggle]')?.focus({preventScroll:true});},900);return()=>clearTimeout(id);}},[opening,arriving]);
   const openPhoto = (index: number) => { lastFocus.current=document.activeElement as HTMLElement; setSelected(index); };
   const toggle = () => setExpanded(value => !value);
   const close = () => { if (closing) return; setClosing(true); };
@@ -78,7 +87,8 @@ export default function App() {
   };
   const photo = selected !== null ? photos[selected] : null;
   return <main className="birthday" onClickCapture={e=>{if(!(e.target as HTMLElement).closest('.music-toggle'))startMusic();}}>
-    <div className="experience" aria-hidden={selected !== null ? true : undefined} inert={selected !== null ? true : undefined}>
+    {opening&&<Opening key={openingKey} onComplete={finishOpening} onReveal={revealCake} onStart={startMusic} sound={sound} onToggleSound={toggleMusic}/>}
+    <div className={`experience ${arriving?'experience--arriving':''}`} aria-hidden={selected !== null || opening ? true : undefined} inert={selected !== null || opening ? true : undefined}>
       <section className={`hero ${expanded ? 'is-open' : ''}`} onClick={toggle} aria-label="生日弹珠蛋糕">
         <CosmicBackdrop/>
         <button className={`music-toggle ${sound ? 'playing' : ''}`} data-testid="music" aria-label={sound ? '关闭背景音乐' : '播放背景音乐'} aria-pressed={sound} onClick={e=>{e.stopPropagation();toggleMusic();}}><span aria-hidden="true">{[0,1,2,3].map(i=><i key={i}/>)}</span></button>
@@ -94,7 +104,7 @@ export default function App() {
         {message && <div className="scene-message" role="status">{message}<button onClick={() => location.reload()}>重新加载</button></div>}
         {failed && <div className="fallback"><p>此设备暂时无法显示 3D，仍可轻触照片查看祝福。</p>{photos.map((p,i)=><button key={p.id} onClick={e=>{e.stopPropagation();openPhoto(i);}}><img src={p.thumbnail||p.src} alt={p.label}/></button>)}</div>}
         <footer className="controls" onClick={e=>e.stopPropagation()}>
-          <p className="moment-label">{expanded ? `${photos.length} 个瞬间，每一个都关于你` : '把漫天星光，聚成你的生日'}</p>
+          <div className="moment-row"><p className="moment-label">{expanded ? `${photos.length} 个瞬间，每一个都关于你` : '把漫天星光，聚成你的生日'}</p><button className="replay-opening" data-testid="replay-opening" onClick={replayOpening}>重播序章</button></div>
           <button className="reveal-button" onClick={toggle} aria-expanded={expanded} data-testid="toggle"><span aria-hidden="true">{expanded ? '✧' : '✦'}</span>{expanded ? '重新聚成蛋糕' : '轻触，打开生日惊喜'}</button>
           <p className="gesture-hints">轻触展开 / 收拢 · 滑动旋转 · 点击照片放大</p>
           {ready && !failed && loaded < photos.length && <span className="asset-progress" role="status">回忆载入中 {loaded}/{photos.length}</span>}

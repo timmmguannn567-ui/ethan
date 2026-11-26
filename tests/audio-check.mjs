@@ -11,8 +11,9 @@ try {
    createDynamicsCompressor(){const node=super.createDynamicsCompressor();const connect=node.connect.bind(node);node.connect=(target,...args)=>{const result=connect(target,...args);if(target===this.destination){window.__musicAnalyser=this.createAnalyser();connect(window.__musicAnalyser);}return result;};return node;}
   };
  });
- await page.goto('http://localhost:5173/',{waitUntil:'networkidle'});
+ await page.goto(process.env.TEST_URL||'http://localhost:5173/',{waitUntil:'networkidle'});
  assert.equal(await page.evaluate(()=>!!window.__musicContext),false);
+ if(await page.getByTestId('skip-opening').count()){await page.getByTestId('skip-opening').click();await page.getByTestId('opening').waitFor({state:'detached'});}
  await page.getByTestId('toggle').click();await page.waitForTimeout(2200);
  assert.equal(await page.getByTestId('music').getAttribute('aria-pressed'),'true');
  const rms=()=>{const a=window.__musicAnalyser;const data=new Float32Array(a.fftSize);a.getFloatTimeDomainData(data);return Math.sqrt(data.reduce((s,x)=>s+x*x,0)/data.length);};
