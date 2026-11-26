@@ -5,7 +5,7 @@ const browser=await chromium.launch({headless:true,channel:'chrome'});
 try{
  const page=await browser.newPage({viewport:{width:390,height:844}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(process.env.TEST_URL||'http://localhost:5173/',{waitUntil:'networkidle'});
- if(await page.getByTestId('skip-opening').count()){await page.getByTestId('skip-opening').click();await page.getByTestId('opening').waitFor({state:'detached'});}
+ if(await page.getByTestId('opening').count()){await page.getByTestId('start-opening').click();await page.getByTestId('release-wish').click();await page.getByTestId('opening').waitFor({state:'detached'});}
  assert.ok(await page.evaluate(()=>JSON.parse(document.getElementById('birthday-inscriptions').textContent)['19'].startsWith('data:image/jpeg;base64,')));await page.getByTestId('toggle').click();await page.waitForTimeout(3000);
  assert.ok((await page.locator('.moment-label').innerText()).includes('20'));
  const box=await page.locator('.scene').boundingBox();

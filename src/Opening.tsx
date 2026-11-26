@@ -30,13 +30,12 @@ export function Opening({onComplete,onReveal,onStart,sound,onToggleSound}:Props)
   },[phase,count,canvasReady]);
   const start=()=>{if(started.current)return;started.current=true;callbacks.current.onStart();setPhase('countdown');};
   const release=()=>{if(finishing.current)return;finishing.current=true;setPhase('release');};
-  const skip=()=>{if(finishing.current)return;finishing.current=true;callbacks.current.onStart();callbacks.current.onReveal();setPhase('reveal');};
   const stageTitle=phase==='countdown'?String(count):phase==='name'?config.name:phase==='birthday'?'生日快乐':phase==='wish'?'把愿望，交给星空':phase==='release'?'愿望已送达':'一整个宇宙，正在为你亮起';
   return <section className={`opening opening--${phase}`} data-testid="opening" data-phase={phase} aria-label="专属生日序章">
     <div className="opening-nebula" aria-hidden="true"/>
     <canvas ref={canvas} className="opening-canvas" aria-hidden="true" onPointerMove={e=>{engine.current?.move(e.clientX,e.clientY);}} onPointerLeave={()=>engine.current?.move(0,0,false)} onPointerDown={e=>{engine.current?.move(e.clientX,e.clientY);engine.current?.bloom(e.clientX,e.clientY);}} onPointerUp={e=>{if(e.pointerType!=='mouse')engine.current?.move(0,0,false);}} onPointerCancel={()=>engine.current?.move(0,0,false)}/>
     <div className="opening-frame" aria-hidden="true"/>
-    <header className="opening-top"><span>FOR {config.name.toUpperCase()} <i>✦</i> ONLY YOU</span><button onClick={skip} data-testid="skip-opening">直接看蛋糕</button></header>
+    <header className="opening-top"><span>FOR {config.name.toUpperCase()} <i>✦</i> ONLY YOU</span></header>
     <div className="opening-copy" key={phase==='countdown'?'countdown':phase}>
       <p className="opening-eyebrow">{phase==='invitation'?'SOME STARS ARE MEANT TO MEET':phase==='countdown'?'YOUR LITTLE UNIVERSE IS WAKING UP':phase==='wish'?'MAKE A WISH':'A MOMENT THAT BELONGS TO US'}</p>
       {phase==='invitation'?<><h2>有一整个宇宙<br/>想对你说<span>生日快乐</span></h2><p className="opening-subtitle">{config.opening.invitation}</p></>:<><h2 className="opening-small-title">{phase==='countdown'?'让惊喜，慢慢靠近你':phase==='name'?'万千星光，只为你而来':phase==='birthday'?'今天，你是宇宙的中心':phase==='wish'?'闭上眼，许一个愿望':phase==='release'?'每一个明天，都想陪你':'这是属于我们的生日宇宙'}</h2></>}

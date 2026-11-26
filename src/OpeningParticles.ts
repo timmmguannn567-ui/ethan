@@ -104,7 +104,7 @@ export class OpeningParticles {
       const shimmer=this.reduced?1:.62+Math.sin(t*(1.05+this.depths[i]*.65)+this.phases[i])*.25+Math.sin(t*.63+this.phases[i]*2.1)*.13;
       const radius=(.5+this.depths[i]*.85)*perspective*(.85+shimmer*.25);
       ctx.globalAlpha=(.32+this.depths[i]*.54)*shimmer*fading;
-      ctx.fillStyle=this.shape==='heart'?(i%3?'#ffc7e0':'#b8c9ff'):(i%3===0?'#f5bad6':i%3===1?'#c9b4f4':'#aed3f2');
+      ctx.fillStyle=lettering?(i%4===0?'#e4ebf8':'#ffffff'):this.shape==='heart'?(i%3?'#ffc7e0':'#b8c9ff'):(i%3===0?'#f5bad6':i%3===1?'#c9b4f4':'#aed3f2');
       ctx.beginPath();ctx.arc(x,y,Math.max(.3,radius),0,Math.PI*2);ctx.fill();
       if(i%19===0){
         const alpha=ctx.globalAlpha;ctx.globalAlpha=alpha*.09;ctx.beginPath();ctx.arc(x,y,radius*7,0,Math.PI*2);ctx.fill();

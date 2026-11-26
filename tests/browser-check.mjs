@@ -10,7 +10,7 @@ try {
   const page=await browser.newPage({viewport,deviceScaleFactor:1});
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(process.env.TEST_URL||'http://localhost:5173/',{waitUntil:'networkidle'});
- if(await page.getByTestId('skip-opening').count()){await page.getByTestId('skip-opening').click();await page.getByTestId('opening').waitFor({state:'detached'});}
+ if(await page.getByTestId('opening').count()){await page.getByTestId('start-opening').click();await page.getByTestId('release-wish').click();await page.getByTestId('opening').waitFor({state:'detached'});}
   await page.waitForFunction(()=>window.__birthday?.snapshot().loadedPhotos===20,null,{timeout:45000});
   await mkdir('test-results',{recursive:true});
   await page.screenshot({path:`test-results/cake-${viewport.width}.png`});

@@ -5,7 +5,7 @@
 .opening-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
 .opening-frame{position:absolute;inset:16px;border:1px solid #b6b8e013;border-radius:25px;pointer-events:none}
 .opening-top{position:absolute;top:max(32px,env(safe-area-inset-top));left:32px;right:32px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.opening-top>span{font-size:9px;letter-spacing:1.8px;color:#b5b6d1}.opening-top i{font-style:normal;color:#e7bad3;margin:0 5px}.opening-top button{padding:8px 0 8px 10px;color:#adb1c8;background:transparent;font-size:12px}
+.opening-top>span{font-size:9px;letter-spacing:1.8px;color:#b5b6d1}.opening-top i{font-style:normal;color:#e7bad3;margin:0 5px}
 .opening-copy{position:absolute;top:15%;left:24px;right:24px;text-align:center;pointer-events:none;animation:opening-copy-in .8s both}
 .opening-eyebrow{font-size:9px;letter-spacing:2.2px;color:#9ca9c9;margin-bottom:20px}
 .opening h2{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-weight:400;font-size:clamp(27px,6.7vw,39px);line-height:1.6;letter-spacing:.13em;margin:0}
@@ -32,11 +32,12 @@
 @media(max-height:700px){.opening-copy{top:14%}.opening-eyebrow{margin-bottom:12px;font-size:8px}.opening h2{font-size:25px;line-height:1.45}.opening-subtitle{margin-top:10px;font-size:12px}.opening-bottom{bottom:65px;gap:10px}.opening-orbit-note{font-size:11px}.opening-primary{min-height:46px;padding:12px 22px;font-size:14px}.opening-caption{font-size:13px;max-width:290px}.opening-hint{font-size:10px}.opening-sound{bottom:20px}.opening-top{top:24px;left:26px;right:26px}.opening-top>span{font-size:8px;letter-spacing:1px}.moment-row{gap:8px}}
 @media(prefers-reduced-motion:reduce){.opening,.opening-primary{transition:none}.experience--arriving,.opening-copy,.opening-sound.is-playing i{animation:none}}
 
-/* Softer, personal lettering scoped to the opening only. */
+/* Airy white lettering, scoped to the opening so photo handwriting stays intact. */
 .opening h2,.opening-subtitle,.opening-caption,.opening-orbit-note,.opening-primary{font-family:BirthdayOpening,'Fredoka','PingFang SC',sans-serif;font-weight:400;letter-spacing:.045em}
-.opening h2,.opening .opening-small-title{color:transparent;background:linear-gradient(115deg,#b8dcff 10%,#dcc3ff 44%,#ffc3dd 80%);background-clip:text;-webkit-background-clip:text;opacity:.88;text-shadow:none}
-.opening h2 span{color:transparent;background:linear-gradient(110deg,#ffc0dd,#efb6ee,#c0d3ff);background-clip:text;-webkit-background-clip:text;text-shadow:none}
-.opening-subtitle{color:#c3b5d7;opacity:.78;font-size:15px}.opening-orbit-note{color:#c9c0e3;opacity:.8;font-size:15px}
-.opening-caption{color:#e2c4e2;opacity:.84;font-size:17px}.opening-primary{color:#efcce4;font-size:17px;background:linear-gradient(115deg,#263751b8,#3a2847c9);border-color:#d1b2e35c}
-.opening--countdown .opening-caption{color:#bcd6ed}.opening--wish .opening-caption{color:#eec3da}.opening-eyebrow{color:#a6bbd7;opacity:.78}
+.opening h2,.opening .opening-small-title{color:#ffffff;opacity:.80;background:none;text-shadow:0 0 24px #ffffff0b}
+.opening h2 span{color:inherit;background:none;text-shadow:none}
+.opening-subtitle{color:#fff;opacity:.55;font-size:15px}.opening-orbit-note{color:#fff;opacity:.60;font-size:15px}
+.opening-caption{color:#fff;opacity:.68;font-size:17px}.opening-primary{color:#ffffffce;font-size:17px;background:linear-gradient(115deg,#2630448a,#322b3d9c);border-color:#ffffff30;box-shadow:inset 0 1px 0 #ffffff0d,0 0 30px #ffffff04}
+.opening-primary span{color:#ffffffa8}.opening-eyebrow{color:#fff;opacity:.44}.opening-top>span{color:#ffffff80}.opening-top i{color:#ffffff90}
+.opening-hint{color:#ffffff66}.opening-sound{color:#ffffff70}.opening-sound i{background:#ffffff99}
 @media(max-height:700px){.opening-subtitle,.opening-orbit-note{font-size:13px}.opening-caption,.opening-primary{font-size:15px}}
