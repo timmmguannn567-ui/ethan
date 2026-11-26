@@ -106,3 +106,5 @@ npm run build:pages
 验证：npm run build:pages、npm test，以及 tests/opening-check.mjs 的手机/桌面完整流程、跳过、重播与原蛋糕检查。
 
 开场单独使用内嵌的站酷快乐体（ZCOOL KuaiLe，SIL OFL），配合粉紫蓝淡彩与约84%–88%的文字不透明度。照片字迹不使用此字体。
+
+倒计时和粒子文字使用固定种子的独立三维微漂移、分层星晕和异步闪烁，保留清晰字形；每拍倒计时为1.7秒。减少动态效果模式关闭漂移和光芒脉动。

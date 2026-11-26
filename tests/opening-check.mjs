@@ -16,7 +16,7 @@ try{
   if(settings.full){
    await page.getByTestId('start-opening').focus();await page.keyboard.press('Enter');
    await page.waitForFunction(()=>document.querySelector('.opening')?.getAttribute('data-phase')==='countdown');
-   await page.waitForTimeout(650);await page.screenshot({path:`test-results/opening-countdown-${settings.width}.png`});
+   await page.waitForTimeout(850);const before=await page.locator('.opening-canvas').screenshot();await page.screenshot({path:`test-results/opening-countdown-${settings.width}.png`});await page.waitForTimeout(400);const after=await page.locator('.opening-canvas').screenshot();assert.notDeepEqual(before,after,'Particle field must remain alive after the number forms');await page.screenshot({path:`test-results/opening-countdown-drift-${settings.width}.png`});
    await page.waitForFunction(()=>document.querySelector('.opening')?.getAttribute('data-phase')==='name');await page.waitForTimeout(900);await page.screenshot({path:`test-results/opening-name-${settings.width}.png`});
    await page.waitForFunction(()=>document.querySelector('.opening')?.getAttribute('data-phase')==='birthday');await page.waitForTimeout(900);await page.screenshot({path:`test-results/opening-birthday-${settings.width}.png`});
    await page.getByTestId('release-wish').waitFor();await page.waitForTimeout(900);await page.screenshot({path:`test-results/opening-wish-${settings.width}.png`});

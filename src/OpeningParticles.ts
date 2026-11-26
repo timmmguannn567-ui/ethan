@@ -73,25 +73,44 @@ export class OpeningParticles {
     const dt=Math.min((now-(this.last||now-16))/1000,.05);this.last=now;this.time+=dt;this.burstAge+=dt;
     const {ctx,width:w,height:h,size}=this;ctx.clearRect(0,0,w,h);
     const cx=w/2,cy=h*.48;const t=this.reduced?0:this.time;
-    for(const star of this.stars){ctx.globalAlpha=.16+star.z*.36+Math.sin(t*.6+star.x*60)*.1;ctx.fillStyle=star.z>.5?'#b7cfff':'#f8cbdf';ctx.beginPath();ctx.arc(star.x*w,star.y*h,.4+star.z*.7,0,Math.PI*2);ctx.fill();}
+    for(const star of this.stars){
+      const drift=this.reduced?0:5+star.z*7;
+      const x=star.x*w+Math.sin(t*.22+star.x*30)*drift,y=star.y*h+Math.cos(t*.18+star.y*30)*drift;
+      ctx.globalAlpha=.12+star.z*.32+Math.sin(t*(.6+star.z)+star.x*60)*.11;
+      ctx.fillStyle=star.z>.5?'#b7cfff':'#f8cbdf';ctx.beginPath();ctx.arc(x,y,.4+star.z*.8,0,Math.PI*2);ctx.fill();
+    }
     ctx.globalAlpha=1;
     const glow=ctx.createRadialGradient(cx,cy,0,cx,cy,size*.62);glow.addColorStop(0,this.shape==='heart'?'#a6366817':'#527cdc14');glow.addColorStop(1,'#11132c00');ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
-    const orbit=this.shape==='orbit';const fading=this.shape==='burst'?Math.max(0,1-(this.burstAge-.7)/1.5):1;
+    const orbit=this.shape==='orbit';const lettering=['3','2','1','name','birthday'].includes(this.shape);const fading=this.shape==='burst'?Math.max(0,1-(this.burstAge-.7)/1.5):1;
     // One soft glow layer is cheaper and clearer than per-particle canvas shadows.
     ctx.globalCompositeOperation='lighter';
     for(let i=0;i<this.count;i++){
       const p=this.points[i],target=this.targets[i];if(!target)continue;
       let tx=target.x,ty=target.y,tz=target.z;
       if(orbit){const a=t*.14,cos=Math.cos(a),sin=Math.sin(a);tx=target.x*cos-target.z*sin;tz=target.x*sin+target.z*cos;ty=target.y+Math.sin(t*.8+this.phases[i])*.008;}
+      // The glyph stays readable while each star drifts on its own seeded orbit.
+      // Keep cached targets unchanged: motion is continuous, never re-randomized.
+      if(!this.reduced&&!orbit&&this.shape!=='burst'){
+        const phase=this.phases[i],depth=this.depths[i];
+        const drift = lettering ? .004+depth*.007 : .004+depth*.004;
+        tx+=Math.sin(t*(.65+depth*.35)+phase)*drift;
+        ty+=Math.cos(t*(.55+depth*.3)+phase*1.7)*drift;
+        tz+=Math.sin(t*.47+phase)*.045;
+        if(i%31===0){tx+=Math.sin(t*.55+phase)*.018;ty+=Math.cos(t*.45+phase)*.018;}
+      }
       const ease=1-Math.exp(-dt*(this.shape==='burst'?2.3:6));p.x+=(tx-p.x)*ease;p.y+=(ty-p.y)*ease;p.z+=(tz-p.z)*ease;
       const perspective=1/(1-p.z*.55);let x=cx+p.x*size*perspective,y=cy+p.y*size*perspective;
       if(this.pointer.active&&!this.reduced){const dx=x-this.pointer.x,dy=y-this.pointer.y,dist=Math.hypot(dx,dy);if(dist<85&&dist>1){const force=(1-dist/85)*(orbit?-13:20);x+=dx/dist*force;y+=dy/dist*force;}}
-      const shimmer=this.reduced?1:.78+Math.sin(t*1.3+this.phases[i])*.22;
-      const radius=(.55+this.depths[i]*.8)*perspective;
+      const shimmer=this.reduced?1:.62+Math.sin(t*(1.05+this.depths[i]*.65)+this.phases[i])*.25+Math.sin(t*.63+this.phases[i]*2.1)*.13;
+      const radius=(.5+this.depths[i]*.85)*perspective*(.85+shimmer*.25);
       ctx.globalAlpha=(.32+this.depths[i]*.54)*shimmer*fading;
       ctx.fillStyle=this.shape==='heart'?(i%3?'#ffc7e0':'#b8c9ff'):(i%3===0?'#f5bad6':i%3===1?'#c9b4f4':'#aed3f2');
       ctx.beginPath();ctx.arc(x,y,Math.max(.3,radius),0,Math.PI*2);ctx.fill();
-      if(i%45===0){ctx.globalAlpha*=.18;ctx.beginPath();ctx.arc(x,y,radius*4,0,Math.PI*2);ctx.fill();}
+      if(i%19===0){
+        const alpha=ctx.globalAlpha;ctx.globalAlpha=alpha*.09;ctx.beginPath();ctx.arc(x,y,radius*7,0,Math.PI*2);ctx.fill();
+        ctx.globalAlpha=alpha*.18;ctx.beginPath();ctx.arc(x,y,radius*3.5,0,Math.PI*2);ctx.fill();
+        if(shimmer>.74){ctx.globalAlpha=alpha*(shimmer-.65);ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(x-radius*4,y);ctx.lineTo(x+radius*4,y);ctx.moveTo(x,y-radius*5);ctx.lineTo(x,y+radius*5);ctx.stroke();}
+      }
     }
     if(orbit){
       const a=t*.35;for(let i=0;i<2;i++){const angle=a+i*Math.PI,x=cx+Math.cos(angle)*size*.27,y=cy+Math.sin(angle)*size*.10;

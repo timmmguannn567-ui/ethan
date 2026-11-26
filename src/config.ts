@@ -10,7 +10,7 @@ export const birthdayConfig = {
   age: null as number | null,
   opening: {
     enabled: true,
-    countdownBeatMs: 1350,
+    countdownBeatMs: 1700,
     invitation: '有些相遇，让普通的日子开始发光。',
     nameMessage: '宇宙那么大，很高兴遇见你。',
     wishMessage: '愿你的心愿，都有温柔的回响。',
