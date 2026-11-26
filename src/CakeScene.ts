@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { birthdayConfig as config, type Photo } from './config';
+import { birthdayConfig as config, caption19, type Photo } from './config';
 import { generateMarbles, randomGenerator, springStep, phaseProgress, photoSlot, type ElementPose } from './motion';
 
 interface Card { mesh: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>; home: THREE.Vector3; scatter: THREE.Vector3; rotation: THREE.Quaternion; targetRotation: THREE.Quaternion; phase: number; homeScale: number; scatterScale: number; photo: Photo }
@@ -147,6 +147,9 @@ export class CakeScene {
       const image = new Image(); image.onload=()=>resolve(image); image.onerror=()=>resolve(null);
       image.src=reference.thumbnail || reference.src;
     });
+    const newInscription = new Promise<HTMLImageElement | null>(resolve => {
+      const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>resolve(null);image.src=caption19;
+    });
     this.photos.forEach((photo, i) => {
       const layer = i < 7 ? 0 : i < 13 ? 1 : 2;
       const k = i - [0, 7, 13][layer]; const n = [7, 6, Math.max(1, this.photos.length - 13)][layer];
@@ -160,7 +163,7 @@ export class CakeScene {
       const card: Card = { mesh, home: new THREE.Vector3(Math.cos(a) * r, y, Math.sin(a) * r), scatter: new THREE.Vector3(), rotation, targetRotation: this.camera.quaternion.clone(), phase: (i % 5) / 5, homeScale: height, scatterScale: 1, photo };
       this.cards.push(card); this.scene.add(mesh);
       const finish = async (texture: THREE.Texture) => {
-      const inscription = photo.frame ? await closingInscription : null;
+      const inscription = photo.frame ? await closingInscription : photo.captionOverlay ? await newInscription : null;
       if (this.disposed) { texture.dispose(); return; }
       if (photo.captionOverlay || photo.frame) {
         const canvas = document.createElement('canvas'); canvas.width=800; canvas.height=1067;
@@ -179,11 +182,10 @@ export class CakeScene {
         context.fillStyle='#fffdf9'; context.fillRect(0,top,800,1067-top);
         if (photo.frame && inscription) {
           context.drawImage(inscription,0,inscription.height*(1166/1448),inscription.width,inscription.height*(282/1448),0,top,800,1067-top);
-        } else {
-          context.fillStyle='#292728'; context.font='76px BirthdayHandwriting, cursive'; context.textAlign='center';
-          const lines=photo.frame ? photo.caption.replace('当下，','当下，\n').split('\n') : photo.caption.split('，').map((line,i,all)=>line+(i<all.length-1?'，':''));
-          lines.forEach((line,i)=>context.fillText(line,400,top+80+i*78));
+        } else if (inscription) {
+          context.drawImage(inscription,0,top,800,1067-top);
         }
+
         texture.dispose(); texture=new THREE.CanvasTexture(canvas);
       }
       texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy()); material.map = texture; material.needsUpdate = true; this.loaded++; this.onReady(this.loaded); };

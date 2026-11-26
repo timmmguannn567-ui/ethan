@@ -15,6 +15,6 @@ try{
  await page.getByRole('dialog').waitFor();await page.waitForFunction(()=>document.querySelector('.large-photo')?.naturalWidth>0);
  assert.ok((await page.locator('.large-photo').getAttribute('src')).startsWith('data:image/jpeg;'));
  assert.equal(await page.locator('.memory-date').innerText(),'20');
- await page.waitForTimeout(1300);await page.screenshot({path:'test-results/wechat-large-photo.png'});assert.deepEqual(errors,[]);
- console.log(JSON.stringify({embeddedJPEGs:20,sceneLoaded:20,allPhotoRequestsBlocked:true,blocked,largePhotoVisible:true,errors}));
+ await page.waitForTimeout(1300);await page.screenshot({path:'test-results/wechat-large-photo.png'});await page.getByRole('button',{name:'上一张照片'}).click();await page.waitForFunction(()=>document.querySelector('.caption-art')?.naturalWidth===1086);assert.ok((await page.locator('.caption-art').getAttribute('src')).startsWith('data:image/jpeg;'));await page.screenshot({path:'test-results/wechat-caption19.png'});assert.deepEqual(errors,[]);
+ console.log(JSON.stringify({embeddedJPEGs:20,sceneLoaded:20,allPhotoRequestsBlocked:true,blocked,largePhotoVisible:true,caption19Visible:true,errors}));
 }finally{await browser.close();}

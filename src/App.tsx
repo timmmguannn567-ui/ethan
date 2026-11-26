@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { CakeScene } from './CakeScene';
 import { CosmicBackdrop } from './CosmicBackdrop';
 import { birthdayAudio } from './audio';
-import { birthdayConfig as config, type Photo } from './config';
+import { birthdayConfig as config, caption19, type Photo } from './config';
 
 declare global { interface Window { __birthday?: { snapshot: () => ReturnType<CakeScene['diagnostics']> } } }
 const fallback: Photo = { id: 'memory', src: config.placeholder, label: '留给我们的回忆', caption: config.wish, aspect: 400 / 520 };
@@ -23,7 +23,7 @@ function OriginalCaption({photo}:{photo:Photo}) {
 function MemoryPhoto({ photo }: { photo: Photo }) {
   const {src,fallback}=usePhotoImage(photo);
   const image = <img className="large-photo" src={src} alt={`${photo.label}：${photo.caption}`} onError={fallback}/>;
-  if (photo.captionOverlay) return <figure className="caption-replacement">{image}<figcaption><svg viewBox="0 0 800 208" role="img" aria-label={photo.caption}>{photo.caption.split('，').map((line,i,lines)=><text x="400" y={80+i*78} textAnchor="middle" key={i}>{line}{i < lines.length-1 ? '，' : ''}</text>)}</svg></figcaption></figure>;
+  if (photo.captionOverlay) return <figure className="caption-replacement">{image}<figcaption aria-label={photo.caption}><img className="caption-art" src={caption19} alt="" aria-hidden="true"/><span className="visually-hidden">{photo.caption}</span></figcaption></figure>;
   return photo.frame ? <figure className="framed-photo">{image}<OriginalCaption photo={photo}/></figure> : image;
 }
 
@@ -47,7 +47,7 @@ export default function App() {
     try { scene = new CakeScene(host.current, photos, setLoaded, setMessage); engine.current = scene; setReady(true); if (import.meta.env.DEV) window.__birthday = { snapshot: () => scene!.diagnostics() }; }
     catch (error) { console.error('3D scene initialization:', error); setFailed(true); setReady(true); }
     };
-    document.fonts.load('24px BirthdayHandwriting').then(initialize,initialize);
+    initialize();
     return () => { cancelled=true; scene?.dispose(); engine.current = null; delete window.__birthday; };
   }, []);
   useEffect(() => { engine.current?.setExpanded(expanded); }, [expanded]);
