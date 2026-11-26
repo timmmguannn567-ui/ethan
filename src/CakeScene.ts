@@ -139,6 +139,14 @@ export class CakeScene {
   }
   private makePhotos() {
     const loader = new THREE.TextureLoader();
+    // The exact closing inscription is already present on the original card 19.
+    // Read its embedded preview, so WeChat needs no extra network request.
+    const reference = this.photos.find(photo => photo.id === '19');
+    const closingInscription = new Promise<HTMLImageElement | null>(resolve => {
+      if (!reference) return resolve(null);
+      const image = new Image(); image.onload=()=>resolve(image); image.onerror=()=>resolve(null);
+      image.src=reference.thumbnail || reference.src;
+    });
     this.photos.forEach((photo, i) => {
       const layer = i < 7 ? 0 : i < 13 ? 1 : 2;
       const k = i - [0, 7, 13][layer]; const n = [7, 6, Math.max(1, this.photos.length - 13)][layer];
@@ -151,33 +159,32 @@ export class CakeScene {
       const rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(-.07, Math.PI / 2 - a, (i % 3 - 1) * .12));
       const card: Card = { mesh, home: new THREE.Vector3(Math.cos(a) * r, y, Math.sin(a) * r), scatter: new THREE.Vector3(), rotation, targetRotation: this.camera.quaternion.clone(), phase: (i % 5) / 5, homeScale: height, scatterScale: 1, photo };
       this.cards.push(card); this.scene.add(mesh);
-      const finish = (texture: THREE.Texture) => { if (this.disposed) { texture.dispose(); return; } if (photo.captionOverlay) {
-        const canvas = document.createElement('canvas'); canvas.width = 800; canvas.height = Math.round(800 / photo.aspect);
-        const context = canvas.getContext('2d')!;
-        context.drawImage(texture.image, 0, 0, canvas.width, canvas.height);
-        context.fillStyle = '#fffdf9'; context.fillRect(0, canvas.height * .81, 800, canvas.height * .19);
-        context.fillStyle = '#383033'; context.font = '44px BirthdayHandwriting, cursive'; context.textAlign = 'center';
-        const lines = photo.caption.split('，');
-        lines.forEach((line, i) => context.fillText(line + (i < lines.length - 1 ? '，' : ''), 400, canvas.height * .88 + i * 55));
-        texture.dispose(); texture = new THREE.CanvasTexture(canvas);
-      } else if (photo.frame) {
-        const canvas = document.createElement('canvas'); canvas.width = 800; canvas.height = 1150;
-        const context = canvas.getContext('2d')!;
-        context.fillStyle = '#fffdf9'; context.fillRect(0, 0, 800, 1150);
-        const img = texture.image as HTMLImageElement;
-        const scale = Math.min(752 / img.width, 1002 / img.height);
-        const w = img.width * scale, h = img.height * scale;
-        context.drawImage(img, 24 + (752 - w) / 2, 24 + (1002 - h) / 2, w, h);
-        context.fillStyle = '#383033'; context.font = '40px BirthdayHandwriting, cursive'; context.textAlign = 'center';
-        const lines: string[] = []; let line = '';
-        for (const char of photo.caption) {
-          if (context.measureText(line + char).width > 730) { lines.push(line); line = ''; }
-          line += char;
-          if (char === '，' && line.length > 5) { lines.push(line); line = ''; }
+      const finish = async (texture: THREE.Texture) => {
+      const inscription = photo.frame ? await closingInscription : null;
+      if (this.disposed) { texture.dispose(); return; }
+      if (photo.captionOverlay || photo.frame) {
+        const canvas = document.createElement('canvas'); canvas.width=800; canvas.height=1067;
+        const context=canvas.getContext('2d')!;
+        context.fillStyle='#fffdf9'; context.fillRect(0,0,800,1067);
+        if (photo.captionOverlay) {
+          context.drawImage(texture.image,0,0,800,1067);
+        } else {
+          const img=texture.image as HTMLImageElement;
+          const w=800*.9116, h=1067*.7721;
+          const scale=Math.max(w/img.width,h/img.height);
+          const sw=w/scale, sh=h/scale;
+          context.drawImage(img,(img.width-sw)/2,(img.height-sh)/2,sw,sh,800*.0442,1067*.0332,w,h);
         }
-        if (line) lines.push(line);
-        lines.forEach((text, i) => context.fillText(text, 400, 1073 + i * 48));
-        texture.dispose(); texture = new THREE.CanvasTexture(canvas);
+        const top=1067*.80525;
+        context.fillStyle='#fffdf9'; context.fillRect(0,top,800,1067-top);
+        if (photo.frame && inscription) {
+          context.drawImage(inscription,0,inscription.height*(1166/1448),inscription.width,inscription.height*(282/1448),0,top,800,1067-top);
+        } else {
+          context.fillStyle='#292728'; context.font='76px BirthdayHandwriting, cursive'; context.textAlign='center';
+          const lines=photo.frame ? photo.caption.replace('当下，','当下，\n').split('\n') : photo.caption.split('，').map((line,i,all)=>line+(i<all.length-1?'，':''));
+          lines.forEach((line,i)=>context.fillText(line,400,top+80+i*78));
+        }
+        texture.dispose(); texture=new THREE.CanvasTexture(canvas);
       }
       texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy()); material.map = texture; material.needsUpdate = true; this.loaded++; this.onReady(this.loaded); };
       // A brief network failure must not permanently replace a real photo with a placeholder.

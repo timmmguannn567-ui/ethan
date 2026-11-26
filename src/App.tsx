@@ -9,12 +9,22 @@ const fallback: Photo = { id: 'memory', src: config.placeholder, label: '留给�
 const photos = config.photos.length ? config.photos : [fallback];
 function Arrow({ direction = 'right' }: { direction?: 'left' | 'right' }) { return <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ transform: direction === 'left' ? 'rotate(180deg)' : undefined }}><path d="m9 5 7 7-7 7M4 12h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>; }
 
-function MemoryPhoto({ photo }: { photo: Photo }) {
+// Match the 3:4 paper and caption proportions of the original Polaroids.
+function usePhotoImage(photo: Photo) {
   const [src,setSrc]=useState(photo.thumbnail || photo.src);
   useEffect(()=>{let active=true;setSrc(photo.thumbnail || photo.src);const full=new Image();full.onload=()=>{if(active)setSrc(photo.src);};full.src=photo.src;return()=>{active=false;full.onload=null;};},[photo]);
-  const image = <img className="large-photo" src={src} alt={`${photo.label}：${photo.caption}`} onError={()=>setSrc(photo.thumbnail || config.placeholder)}/>;
-  if (photo.captionOverlay) return <figure className="caption-replacement" style={{aspectRatio:photo.aspect}}>{image}<figcaption><span>{photo.caption.split('，').map((line,i,lines)=><span className="caption-line" key={i}>{line}{i < lines.length-1 ? '，' : ''}</span>)}</span></figcaption></figure>;
-  return photo.frame ? <figure className="framed-photo">{image}<figcaption><span>{photo.caption.replace('当下，','当下，\n').split('\n').map((line,i)=><span className="caption-line" key={i}>{line}</span>)}</span></figcaption></figure> : image;
+  return {src, fallback:()=>setSrc(photo.thumbnail || config.placeholder)};
+}
+function OriginalCaption({photo}:{photo:Photo}) {
+  const reference=config.photos.find(p=>p.id==='19')!;
+  const {src,fallback}=usePhotoImage(reference);
+  return <figcaption aria-label={photo.caption}><svg viewBox="0 1166 1086 282" aria-hidden="true"><image href={src} width="1086" height="1448" onError={fallback}/></svg><span className="visually-hidden">{photo.caption}</span></figcaption>;
+}
+function MemoryPhoto({ photo }: { photo: Photo }) {
+  const {src,fallback}=usePhotoImage(photo);
+  const image = <img className="large-photo" src={src} alt={`${photo.label}：${photo.caption}`} onError={fallback}/>;
+  if (photo.captionOverlay) return <figure className="caption-replacement">{image}<figcaption><svg viewBox="0 0 800 208" role="img" aria-label={photo.caption}>{photo.caption.split('，').map((line,i,lines)=><text x="400" y={80+i*78} textAnchor="middle" key={i}>{line}{i < lines.length-1 ? '，' : ''}</text>)}</svg></figcaption></figure>;
+  return photo.frame ? <figure className="framed-photo">{image}<OriginalCaption photo={photo}/></figure> : image;
 }
 
 

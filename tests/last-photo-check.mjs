@@ -15,7 +15,9 @@ try{
  assert.equal(await page.locator('.memory-date').innerText(),'20');
  assert.equal(await page.locator('.viewer-footer p').innerText(),'生日快乐，爱你的每一个当下，也期待陪你的每一个明天。');
  assert.equal((await page.locator('.framed-photo figcaption').innerText()).replace(/\s+/g,''),'生日快乐，爱你的每一个当下，也期待陪你的每一个明天。');
+ const card=await page.locator('.framed-photo').evaluate(el=>({width:el.clientWidth,height:el.clientHeight})); assert.ok(Math.abs(card.width/card.height-.75)<.005);
  await page.waitForTimeout(1300);await page.screenshot({path:'test-results/last-photo-20.png'});
  await page.getByRole('button',{name:'上一张照片'}).click();assert.equal(await page.locator('.memory-date').innerText(),'19');assert.equal(await page.locator('.viewer-footer p').innerText(),'愿我们把平凡的日子，过成值得珍藏的回忆。');assert.equal((await page.locator('.caption-replacement figcaption').innerText()).replace(/\s+/g,''),'愿我们把平凡的日子，过成值得珍藏的回忆。');await page.waitForTimeout(1400);await page.screenshot({path:'test-results/photo-19-new-caption.png'});assert.equal(await page.locator('.framed-photo').count(),0);await page.getByRole('button',{name:'下一张照片'}).click();await page.getByRole('button',{name:'下一张照片'}).click();assert.equal(await page.locator('.memory-date').innerText(),'01');
+ await page.setViewportSize({width:1440,height:1000});await page.getByRole('button',{name:'上一张照片'}).click();await page.waitForTimeout(1400);const desktop=await page.locator('.framed-photo').boundingBox();const desktopRatio=await page.locator('.framed-photo').evaluate(el=>el.clientWidth/el.clientHeight);assert.ok(Math.abs(desktopRatio-.75)<.005);assert.ok(desktop.y>=0 && desktop.y+desktop.height<=1000);await page.screenshot({path:'test-results/layout-desktop.png'});
  assert.deepEqual(errors,[]);console.log(JSON.stringify({count:20,lastPhoto:true,fullResolution:true,captionExact:true,wrapToFirst:true,errors}));
 }finally{await browser.close();}
