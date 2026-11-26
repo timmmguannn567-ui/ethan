@@ -83,16 +83,17 @@ export class CakeScene {
     const count = low ? config.marbleCount.low : mobile ? config.marbleCount.mobile : config.marbleCount.desktop;
     this.marbles = generateMarbles(count, config.seed);
     const materials = [
-      new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: .065, transmission: low ? .55 : .72, thickness: .48, ior: 1.48, clearcoat: 1, envMapIntensity: 1.7, metalness: .05 }),
+      new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: .065, transmission: low ? .55 : .72, thickness: .48, ior: 1.48, clearcoat: 1, envMapIntensity: 1.7, metalness: .05, iridescence: .22, iridescenceIOR: 1.3, iridescenceThicknessRange: [100, 400] }),
       new THREE.MeshPhysicalMaterial({ color: '#ffffff', roughness: .13, transmission: .38, thickness: .65, ior: 1.5, clearcoat: 1, envMapIntensity: 1.5 }),
     ];
-    const counts=[0,0];
-    this.marbles.forEach((_,i)=>{const group=i%5===0?1:0;this.ballSlots.push({group,index:counts[group]++});});
+    materials.push(new THREE.MeshPhysicalMaterial({color:'#d6dde5',metalness:.96,roughness:.16,clearcoat:1,envMapIntensity:2.1}));
+    const counts=[0,0,0];
+    this.marbles.forEach((_,i)=>{const group=i%13===0?2:i%5===0?1:0;this.ballSlots.push({group,index:counts[group]++});});
     this.balls=materials.map((material,g)=>{
       const mesh=new THREE.InstancedMesh(new THREE.SphereGeometry(1,low?16:28,low?12:20),material,counts[g]);
       mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);mesh.frustumCulled=false;this.scene.add(mesh);return mesh;
     });
-    this.marbles.forEach((m,i)=> { const slot=this.ballSlots[i]; this.balls[slot.group].setColorAt(slot.index,new THREE.Color(config.colors[m.color])); });
+    this.marbles.forEach((m,i)=> { const slot=this.ballSlots[i]; this.balls[slot.group].setColorAt(slot.index,new THREE.Color(slot.group===2?'#bec8d5':config.colors[m.color])); });
     const random = randomGenerator(config.seed + 99);
     const particleCount = mobile ? config.particleCount.mobile : config.particleCount.desktop;
     this.particlePositions = new Float32Array(particleCount * 3);
@@ -117,14 +118,17 @@ export class CakeScene {
     this.raf = requestAnimationFrame(this.frame);
   }
   private makeOrbit() {
-    for(let band=0;band<3;band++) {
-      const points: THREE.Vector3[]=[];
+    for(let band=0;band<8;band++) {
+      const points:THREE.Vector3[]=[],colors:number[]=[];
       for(let j=0;j<=180;j++) {
-        const a=j/180*Math.PI*2; const r=3.04+band*.16;
+        const a=j/180*Math.PI*2,r=3.04+band*.055;
         points.push(new THREE.Vector3(Math.cos(a)*r,-2.14+Math.sin(a)*.12,Math.sin(a)*r));
+        const color=new THREE.Color().setHSL((j/180+band*.09)%1,.82,.56);colors.push(color.r,color.g,color.b);
       }
-      const ring=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color:band===1?0xc27bff:0x5acfff,transparent:true,opacity:.24,depthWrite:false,blending:THREE.AdditiveBlending}));
-      this.orbit.add(ring);
+      const geometry=new THREE.BufferGeometry().setFromPoints(points);geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+      const opacity=.12+(band%3)*.04;
+      const ring=new THREE.Line(geometry,new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity,depthWrite:false,blending:THREE.AdditiveBlending}));
+      ring.userData.opacity=opacity;this.orbit.add(ring);
     }
     this.scene.add(this.orbit);
   }
@@ -285,7 +289,7 @@ export class CakeScene {
     (this.particles.material as THREE.ShaderMaterial).uniforms.uTime.value = this.reduced ? 0 : this.time;
     this.candle.scale.setScalar(1 - phaseProgress(p, 0)*.6);
     this.orbit.rotation.y = this.time * .035;
-    this.orbit.children.forEach(child => { ( (child as THREE.Line).material as THREE.LineBasicMaterial).opacity = .24 * (1-phaseProgress(p,0)*.9); });
+    this.orbit.children.forEach(child => { ( (child as THREE.Line).material as THREE.LineBasicMaterial).opacity = (child.userData.opacity ?? .24) * (1-phaseProgress(p,0)*.9); });
     this.flame.rotation.z = this.reduced ? 0 : Math.sin(this.time * 3) * .10 + Math.sin(this.time * 5.1) * .03;
     this.flame.scale.y = 1 + Math.sin(this.time * 4) * .05;
     this.renderer.render(this.scene, this.camera);

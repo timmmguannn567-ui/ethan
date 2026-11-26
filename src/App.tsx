@@ -23,7 +23,7 @@ function OriginalCaption({photo}:{photo:Photo}) {
 }
 function MemoryPhoto({ photo }: { photo: Photo }) {
   const {src,fallback}=usePhotoImage(photo);
-  const image = <img className="large-photo" src={src} alt={`${photo.label}：${photo.caption}`} onError={fallback}/>;
+  const image = <img draggable={false} className="large-photo" src={src} alt={`${photo.label}：${photo.caption}`} onError={fallback}/>;
   if (photo.captionOverlay) return <figure className="caption-replacement">{image}<figcaption aria-label={photo.caption}><img className="caption-art" src={caption19} alt="" aria-hidden="true"/><span className="visually-hidden">{photo.caption}</span></figcaption></figure>;
   return photo.frame ? <figure className="framed-photo">{image}<OriginalCaption photo={photo}/></figure> : image;
 }
@@ -39,6 +39,7 @@ export default function App() {
   useEffect(() => { const visibility=()=>birthdayAudio.visibility(); document.addEventListener('visibilitychange',visibility); return ()=>{document.removeEventListener('visibilitychange',visibility);birthdayAudio.dispose();}; }, []);
   const startMusic = () => { if(!musicMuted.current)void birthdayAudio.start().then(setSound); };
   const toggleMusic = () => { const enabled = !sound; musicMuted.current=!enabled; void birthdayAudio.setEnabled(enabled).then(setSound); };
+  const photoSwipe=useRef<{x:number;y:number}|null>(null);
   const lastFocus = useRef<HTMLElement | null>(null);
   const [expanded, setExpanded] = useState(false); const [loaded, setLoaded] = useState(0); const [failed, setFailed] = useState(false); const [message, setMessage] = useState('');
   const [selected, setSelected] = useState<number | null>(null); const [closing, setClosing] = useState(false);
@@ -113,9 +114,9 @@ export default function App() {
     </div>
     {photo && <div className={`memory-dialog ${closing ? 'closing' : ''}`} ref={dialog} role="dialog" aria-modal="true" aria-label={`${photo.label}的生日回忆`} onClick={e => { e.stopPropagation(); if (e.target === e.currentTarget) close(); }}>
       <button ref={closeButton} className="close-button" onClick={close} aria-label="关闭照片"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" strokeWidth="1.4"/></svg></button>
-      <span className="viewer-kicker">A MOMENT TO KEEP</span>
-      <div className="photo-arrival" key={photo.id}><div className="photo-sway"><MemoryPhoto key={photo.id} photo={photo}/></div></div>
-      <div className="viewer-footer"><span className="memory-date">{String(selected! + 1).padStart(2, '0')}</span><p>{photo.caption}</p><div className="viewer-navigation"><button onClick={() => setSelected((selected! - 1 + photos.length) % photos.length)} aria-label="上一张照片"><Arrow direction="left"/></button><span>{String(selected! + 1).padStart(2, '0')} <i>/</i> {String(photos.length).padStart(2, '0')}</span><button onClick={() => setSelected((selected! + 1) % photos.length)} aria-label="下一张照片"><Arrow/></button></div></div>
+      <span className="viewer-kicker">A MOMENT TO KEEP<b>{photo.label}</b></span>
+      <div className="photo-arrival" key={photo.id} onPointerDown={e=>{if(e.isPrimary){photoSwipe.current={x:e.clientX,y:e.clientY};e.currentTarget.setPointerCapture(e.pointerId);}}} onPointerUp={e=>{const start=photoSwipe.current;photoSwipe.current=null;if(!start)return;const dx=e.clientX-start.x,dy=e.clientY-start.y;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.3)setSelected(n=>n===null?null:(n+(dx<0?1:-1)+photos.length)%photos.length);}} onPointerCancel={()=>{photoSwipe.current=null;}}><div className="photo-sway"><MemoryPhoto key={photo.id} photo={photo}/></div></div>
+      <div className="viewer-footer"><span className="memory-date">{String(selected! + 1).padStart(2, '0')}</span><p>{photo.caption}</p><div className="memory-progress" aria-hidden="true">{photos.map((item,i)=><i key={item.id} className={i===selected?'active':''}/>)}</div><div className="viewer-navigation"><button onClick={() => setSelected((selected! - 1 + photos.length) % photos.length)} aria-label="上一张照片"><Arrow direction="left"/></button><span>{String(selected! + 1).padStart(2, '0')} <i>/</i> {String(photos.length).padStart(2, '0')}</span><button onClick={() => setSelected((selected! + 1) % photos.length)} aria-label="下一张照片"><Arrow/></button></div></div>
     </div>}
   </main>;
 }

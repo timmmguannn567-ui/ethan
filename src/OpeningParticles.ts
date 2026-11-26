@@ -1,3 +1,4 @@
+import { drawSpectralHalo } from './SpectralHalo';
 import { randomGenerator } from './motion';
 
 export type OpeningShape = 'orbit' | '3' | '2' | '1' | 'name' | 'birthday' | 'heart' | 'burst';
@@ -7,7 +8,7 @@ type Spark = { x:number; y:number; vx:number; vy:number; life:number; max:number
 export class OpeningParticles {
   private ctx:CanvasRenderingContext2D;
   private rng=randomGenerator(20261126);
-  private width=1; private height=1; private size=1; private raf=0; private last=0; private time=0;
+  private width=1; private height=1; private size=1; private desiredSize=1; private centerY=0; private desiredY=0; private raf=0; private last=0; private time=0;
   private shape:OpeningShape='orbit'; private points:Point[]=[]; private targets:Point[]=[];
   private phases:number[]=[]; private depths:number[]=[]; private stars:Point[]=[];
   private pointer={x:0,y:0,active:false}; private sparks:Spark[]=[];
@@ -25,11 +26,21 @@ export class OpeningParticles {
   }
   private resize=()=>{
     this.width=this.canvas.clientWidth;this.height=this.canvas.clientHeight;
-    this.size=Math.min(this.width*.87,this.height*.55,720);
+    this.fitVisual();
+    if(this.size===1){this.size=this.desiredSize;this.centerY=this.desiredY;}
     const dpr=Math.min(devicePixelRatio||1,innerWidth<700?1.75:1.5);
     this.canvas.width=Math.round(this.width*dpr);this.canvas.height=Math.round(this.height*dpr);
     this.ctx.setTransform(dpr,0,0,dpr,0,0);
   };
+  private fitVisual(){
+    const rect=this.canvas.getBoundingClientRect();
+    const copy=this.canvas.parentElement?.querySelector('.opening-copy')?.getBoundingClientRect();
+    const controls=this.canvas.parentElement?.querySelector('.opening-bottom')?.getBoundingClientRect();
+    const top=copy?copy.bottom-rect.top+20:this.height*.28;
+    const bottom=controls?controls.top-rect.top-20:this.height*.73;
+    this.desiredY=(top+bottom)/2;
+    this.desiredSize=Math.max(100,Math.min(this.width*.87,this.height*.55,720,(bottom-top)/.9));
+  }
   private letters(value:string):Point[] {
     const mask=document.createElement('canvas');mask.width=960;mask.height=400;
     const ctx=mask.getContext('2d')!;ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
@@ -42,7 +53,7 @@ export class OpeningParticles {
     return points;
   }
   morph(shape:OpeningShape) {
-    this.shape=shape;this.burstAge=0;
+    this.shape=shape;this.burstAge=0;this.fitVisual();
     if(!this.cache.has(shape)){
       let samples:Point[]=[];
       if(['3','2','1','name','birthday'].includes(shape))samples=this.letters(shape==='name'?this.name:shape==='birthday'?'生日快乐':shape);
@@ -54,8 +65,8 @@ export class OpeningParticles {
           return {x:16*Math.sin(t)**3/40*shell,y:-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))/40*shell,z:(this.rng()-.5)*.16};
         }
         if(shape==='burst'){const r=.7+this.rng()*1.9;return{x:Math.cos(angle)*r,y:Math.sin(angle)*r,z:-.7+this.rng()*2};}
-        const radius=.11+Math.pow(this.rng(),.65)*.35;
-        return {x:Math.cos(angle)*radius,y:Math.sin(angle)*radius*.32+(this.rng()-.5)*.045,z:Math.sin(angle)*radius*.55};
+        const radius=.30+Math.pow(this.rng(),.7)*.13;
+        return {x:Math.cos(angle)*radius,y:Math.sin(angle)*radius*.84+(this.rng()-.5)*.024,z:Math.sin(angle)*radius*.19};
       });this.cache.set(shape,positions);
     }
     this.targets=this.cache.get(shape)!;
@@ -71,8 +82,9 @@ export class OpeningParticles {
     this.raf=requestAnimationFrame(this.draw);if(document.hidden){this.last=now;return;}
     if(now-this.last<(this.reduced?65:22))return;
     const dt=Math.min((now-(this.last||now-16))/1000,.05);this.last=now;this.time+=dt;this.burstAge+=dt;
+    const framing=1-Math.exp(-dt*4);this.centerY+=(this.desiredY-this.centerY)*framing;this.size+=(this.desiredSize-this.size)*framing;
     const {ctx,width:w,height:h,size}=this;ctx.clearRect(0,0,w,h);
-    const cx=w/2,cy=h*.48;const t=this.reduced?0:this.time;
+    const cx=w/2,cy=this.centerY;const t=this.reduced?0:this.time;
     for(const star of this.stars){
       const drift=this.reduced?0:5+star.z*7;
       const x=star.x*w+Math.sin(t*.22+star.x*30)*drift,y=star.y*h+Math.cos(t*.18+star.y*30)*drift;
@@ -82,6 +94,7 @@ export class OpeningParticles {
     ctx.globalAlpha=1;
     const glow=ctx.createRadialGradient(cx,cy,0,cx,cy,size*.62);glow.addColorStop(0,this.shape==='heart'?'#a6366817':'#527cdc14');glow.addColorStop(1,'#11132c00');ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
     const orbit=this.shape==='orbit';const lettering=['3','2','1','name','birthday'].includes(this.shape);const fading=this.shape==='burst'?Math.max(0,1-(this.burstAge-.7)/1.5):1;
+    drawSpectralHalo(ctx,cx,cy,size*.36,t,orbit ? .86 : this.shape==='burst' ? .36*fading : lettering ? .12 : .18,orbit);
     // One soft glow layer is cheaper and clearer than per-particle canvas shadows.
     ctx.globalCompositeOperation='lighter';
     for(let i=0;i<this.count;i++){
@@ -113,7 +126,7 @@ export class OpeningParticles {
       }
     }
     if(orbit){
-      const a=t*.35;for(let i=0;i<2;i++){const angle=a+i*Math.PI,x=cx+Math.cos(angle)*size*.27,y=cy+Math.sin(angle)*size*.10;
+      const a=t*.35;for(let i=0;i<2;i++){const angle=a+i*Math.PI,x=cx+Math.cos(angle)*size*.33,y=cy+Math.sin(angle)*size*.29;
         const halo=ctx.createRadialGradient(x,y,0,x,y,24);halo.addColorStop(0,i?'#ffd4ebff':'#d4f4ffff');halo.addColorStop(.12,i?'#ffa3d0bb':'#a9daffbb');halo.addColorStop(1,'#aabbff00');ctx.globalAlpha=1;ctx.fillStyle=halo;ctx.fillRect(x-24,y-24,48,48);
       }
     }

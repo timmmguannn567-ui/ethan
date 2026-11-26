@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { drawSpectralHalo } from './SpectralHalo';
 import { randomGenerator } from './motion';
 
 /** Local, deterministic star field. No image download, camera or remote service. */
@@ -14,6 +15,7 @@ export function CosmicBackdrop() {
     const draw=(now:number)=>{
       raf=requestAnimationFrame(draw);if(document.hidden||now-last<40)return;last=now;
       const t=reduced?0:now*.00008;ctx.clearRect(0,0,w,h);
+      drawSpectralHalo(ctx,w*.5,h*.59,Math.min(w*.52,h*.28,360),t*8,.12,false);
       for(const s of stars){
         const x=(s.x*w+Math.sin(t+s.phase)*8*s.z+w)%w;
         const y=(s.y*h+Math.cos(t*.7+s.phase)*5*s.z+h)%h;
