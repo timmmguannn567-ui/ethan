@@ -4,7 +4,7 @@
 .opening-nebula{background:radial-gradient(ellipse at 30% 50%,#16263229,transparent 42%),radial-gradient(ellipse at 73% 52%,#28132720,transparent 45%),linear-gradient(#010204,#030409 72%,#010204)}
 .opening-frame{border-color:#dbe7f00e;border-radius:4px;background:linear-gradient(90deg,#c7eaff60,#ffffff00) 0 0/25px 1px no-repeat,linear-gradient(180deg,#c7eaff60,#ffffff00) 0 0/1px 25px no-repeat,linear-gradient(270deg,#c7eaff40,#ffffff00) 100% 100%/25px 1px no-repeat,linear-gradient(0deg,#c7eaff40,#ffffff00) 100% 100%/1px 25px no-repeat}
 .opening-copy .opening-eyebrow{letter-spacing:2.5px}.opening-copy h2{filter:drop-shadow(0 0 18px #eaf2ff0b)}
-.opening-primary,.birthday .reveal-button{isolation:isolate;border:1px solid #b7c9d038;background:linear-gradient(160deg,#55647225,#11151d 35%,#05070b 75%,#252b361c);box-shadow:inset 0 1px 0 #eff5ff15,inset 0 -1px 0 #000,0 14px 35px #0008;color:#ffffffe0;transition:transform .25s,box-shadow .3s,border-color .3s}
+.birthday .reveal-button{isolation:isolate;border:1px solid #b7c9d038;background:linear-gradient(160deg,#55647225,#11151d 35%,#05070b 75%,#252b361c);box-shadow:inset 0 1px 0 #eff5ff15,inset 0 -1px 0 #000,0 14px 35px #0008;color:#ffffffe0;transition:transform .25s,box-shadow .3s,border-color .3s}
 .opening-primary:before,.birthday .reveal-button:before{content:'';position:absolute;left:23%;right:23%;top:-1px;height:1px;background:var(--spectrum);opacity:.72;filter:drop-shadow(0 0 5px #c2c9ff66);pointer-events:none}
 .birthday .reveal-button{position:relative}.opening-primary:hover,.birthday .reveal-button:hover{border-color:#c8deed66;background:linear-gradient(150deg,#273340,#0d1017 60%,#201520);box-shadow:inset 0 1px 0 #ffffff20,0 0 28px #91b3df12;transform:translateY(-2px)}
 .opening-primary:active,.birthday .reveal-button:active{transform:translateY(0) scale(.98)}
@@ -32,3 +32,11 @@
 .opening-primary:before{background:var(--dream-spectrum);left:17%;right:17%;opacity:.85}
 .opening-primary{background:linear-gradient(125deg,#41c9ed12,#0c1019 38%,#ffa1c80d);box-shadow:inset 0 1px 0 #ffffff13,0 10px 36px #b481ef0a}
 .opening-frame{border-color:#d2c8e313}
+
+/* Slow atmosphere motion stays on a compositor layer, behind the readable copy. */
+.opening-nebula{inset:-8%;animation:nebula-tide 19s ease-in-out infinite alternate;will-change:transform,opacity}
+.opening-primary{color:#ffffffb8;min-height:50px;min-width:205px;border-color:#cbd7e82e;background:linear-gradient(125deg,#41c9ed0a,#0c101955 38%,#ffa1c80a);box-shadow:inset 0 1px 0 #ffffff0b,0 10px 36px #b481ef08;backdrop-filter:blur(8px)}
+.opening-primary span{color:#edf5ffb0}.opening-copy h2{filter:none}
+@keyframes nebula-tide{0%{transform:translate3d(-1.5%,-1%,0) scale(1);opacity:.72}50%{opacity:1}100%{transform:translate3d(2%,1.5%,0) scale(1.09);opacity:.85}}
+@media(max-height:700px){.opening-primary{min-height:46px}}
+@media(prefers-reduced-motion:reduce){.opening-nebula{animation:none;will-change:auto}}

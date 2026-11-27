@@ -1,3 +1,4 @@
+import { CosmicAtmosphere } from './CosmicAtmosphere';
 import { dreamPalette, cakePalette } from './DreamPalette';
 import { drawSpectralHalo } from './SpectralHalo';
 import { randomGenerator } from './motion';
@@ -11,7 +12,9 @@ export class OpeningParticles {
   private rng=randomGenerator(20261126);
   private width=1; private height=1; private size=1; private desiredSize=1; private centerY=0; private desiredY=0; private raf=0; private last=0; private time=0;
   private shape:OpeningShape='orbit'; private points:Point[]=[]; private targets:Point[]=[];
-  private phases:number[]=[]; private depths:number[]=[]; private stars:Point[]=[];
+  private phases:number[]=[]; private depths:number[]=[];
+  private atmosphere=new CosmicAtmosphere(innerWidth<700?190:280);
+  private parallax={x:0,y:0};
   private pointer={x:0,y:0,active:false}; private sparks:Spark[]=[];
   private observer:ResizeObserver; private cache=new Map<string,Point[]>();
   private count:number; private reduced:boolean; private burstAge=0; private sparkClock=0;
@@ -21,7 +24,6 @@ export class OpeningParticles {
     this.count=this.reduced?850:innerWidth<700?1700:2600;
     this.points=Array.from({length:this.count},()=>({x:(this.rng()-.5)*2,y:(this.rng()-.5)*1.4,z:(this.rng()-.5)*.7}));
     this.phases=this.points.map(()=>this.rng()*Math.PI*2);this.depths=this.points.map(()=>this.rng());
-    this.stars=Array.from({length:140},()=>({x:this.rng(),y:this.rng(),z:this.rng()}));
     this.observer=new ResizeObserver(this.resize);this.observer.observe(canvas);this.resize();
     this.morph('orbit');this.raf=requestAnimationFrame(this.draw);
   }
@@ -50,7 +52,7 @@ export class OpeningParticles {
     while(ctx.measureText(value).width>880){size-=4;ctx.font=`${numeral?600:400} ${size}px ${value==='生日快乐'?'BirthdayOpening':'Fredoka'}, sans-serif`;}
     ctx.fillText(value,480,208);
     const pixels=ctx.getImageData(0,0,960,400).data;const points:Point[]=[];
-    for(let y=0;y<400;y+=3)for(let x=0;x<960;x+=3)if(pixels[(y*960+x)*4+3]>160)points.push({x:(x-480)/960*(numeral?1.65:1),y:(y-200)/960*(numeral?1.65:1),z:0});
+    for(let y=0;y<400;y+=3)for(let x=0;x<960;x+=3)if(pixels[(y*960+x)*4+3]>160)points.push({x:(x-480)/960*(numeral?1.42:.88),y:(y-200)/960*(numeral?1.42:.88),z:0});
     return points;
   }
   morph(shape:OpeningShape) {
@@ -86,12 +88,10 @@ export class OpeningParticles {
     const framing=1-Math.exp(-dt*4);this.centerY+=(this.desiredY-this.centerY)*framing;this.size+=(this.desiredSize-this.size)*framing;
     const {ctx,width:w,height:h,size}=this;ctx.clearRect(0,0,w,h);
     const cx=w/2,cy=this.centerY;const t=this.reduced?0:this.time;
-    for(const star of this.stars){
-      const drift=this.reduced?0:5+star.z*7;
-      const x=star.x*w+Math.sin(t*.22+star.x*30)*drift,y=star.y*h+Math.cos(t*.18+star.y*30)*drift;
-      ctx.globalAlpha=.12+star.z*.32+Math.sin(t*(.6+star.z)+star.x*60)*.11;
-      ctx.fillStyle=dreamPalette[Math.min(dreamPalette.length-1,Math.floor(star.z*dreamPalette.length))];ctx.beginPath();ctx.arc(x,y,.4+star.z*.8,0,Math.PI*2);ctx.fill();
-    }
+    const pointerEase=1-Math.exp(-dt*2.4);
+    this.parallax.x+=((this.pointer.active?this.pointer.x/w*2-1:0)-this.parallax.x)*pointerEase;
+    this.parallax.y+=((this.pointer.active?this.pointer.y/h*2-1:0)-this.parallax.y)*pointerEase;
+    this.atmosphere.draw(ctx,w,h,t,1,this.parallax.x,this.parallax.y,this.reduced);
     ctx.globalAlpha=1;
     const glow=ctx.createRadialGradient(cx,cy,0,cx,cy,size*.62);glow.addColorStop(0,this.shape==='heart'?cakePalette[1]+'23':cakePalette[5]+'20');glow.addColorStop(1,'#11132c00');ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
     const orbit=this.shape==='orbit';const lettering=['3','2','1','name','birthday'].includes(this.shape);const fading=this.shape==='burst'?Math.max(0,1-(this.burstAge-.7)/1.5):1;
@@ -101,23 +101,23 @@ export class OpeningParticles {
     for(let i=0;i<this.count;i++){
       const p=this.points[i],target=this.targets[i];if(!target)continue;
       let tx=target.x,ty=target.y,tz=target.z;
-      if(orbit){const a=t*.14,cos=Math.cos(a),sin=Math.sin(a);tx=target.x*cos-target.z*sin;tz=target.x*sin+target.z*cos;ty=target.y+Math.sin(t*.8+this.phases[i])*.008;}
+      if(orbit){const a=t*.19,cos=Math.cos(a),sin=Math.sin(a);tx=target.x*cos-target.z*sin;tz=target.x*sin+target.z*cos;ty=target.y+Math.sin(t*.95+this.phases[i])*.012;}
       // The glyph stays readable while each star drifts on its own seeded orbit.
       // Keep cached targets unchanged: motion is continuous, never re-randomized.
       if(!this.reduced&&!orbit&&this.shape!=='burst'){
         const phase=this.phases[i],depth=this.depths[i];
-        const drift = lettering ? .004+depth*.007 : .004+depth*.004;
+        const drift = lettering ? .005+depth*.009 : .006+depth*.007;
         tx+=Math.sin(t*(.65+depth*.35)+phase)*drift;
         ty+=Math.cos(t*(.55+depth*.3)+phase*1.7)*drift;
-        tz+=Math.sin(t*.47+phase)*.045;
+        tz+=Math.sin(t*.62+phase)*.06;
         if(i%31===0){tx+=Math.sin(t*.55+phase)*.018;ty+=Math.cos(t*.45+phase)*.018;}
       }
       const ease=1-Math.exp(-dt*(this.shape==='burst'?2.3:6));p.x+=(tx-p.x)*ease;p.y+=(ty-p.y)*ease;p.z+=(tz-p.z)*ease;
       const perspective=1/(1-p.z*.55);let x=cx+p.x*size*perspective,y=cy+p.y*size*perspective;
       if(this.pointer.active&&!this.reduced){const dx=x-this.pointer.x,dy=y-this.pointer.y,dist=Math.hypot(dx,dy);if(dist<85&&dist>1){const force=(1-dist/85)*(orbit?-13:20);x+=dx/dist*force;y+=dy/dist*force;}}
       const shimmer=this.reduced?1:.62+Math.sin(t*(1.05+this.depths[i]*.65)+this.phases[i])*.25+Math.sin(t*.63+this.phases[i]*2.1)*.13;
-      const radius=(.5+this.depths[i]*.85)*perspective*(.85+shimmer*.25);
-      ctx.globalAlpha=(.32+this.depths[i]*.54)*shimmer*fading;
+      const radius=(.5+this.depths[i]*.85)*perspective*(.85+shimmer*.25)*(lettering?.84:1);
+      ctx.globalAlpha=(.32+this.depths[i]*.54)*shimmer*fading*(lettering?.72:1);
       ctx.fillStyle=lettering?(i%4===0?'#e4ebf8':'#ffffff'):this.shape==='heart'?(i%4?dreamPalette[1]:dreamPalette[i%dreamPalette.length]):dreamPalette[i%dreamPalette.length];
       ctx.beginPath();ctx.arc(x,y,Math.max(.3,radius),0,Math.PI*2);ctx.fill();
       if(i%19===0){
