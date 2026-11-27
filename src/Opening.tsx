@@ -1,3 +1,4 @@
+import { openingPaletteStyle } from './DreamPalette';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { birthdayConfig as config } from './config';
 import { OpeningParticles, type OpeningShape } from './OpeningParticles';
@@ -31,7 +32,7 @@ export function Opening({onComplete,onReveal,onStart,sound,onToggleSound}:Props)
   const start=()=>{if(started.current)return;started.current=true;callbacks.current.onStart();setPhase('countdown');};
   const release=()=>{if(finishing.current)return;finishing.current=true;setPhase('release');};
   const stageTitle=phase==='countdown'?String(count):phase==='name'?config.name:phase==='birthday'?'生日快乐':phase==='wish'?'把愿望，交给星空':phase==='release'?'愿望已送达':'一整个宇宙，正在为你亮起';
-  return <section className={`opening opening--${phase}`} data-testid="opening" data-phase={phase} aria-label="专属生日序章">
+  return <section className={`opening opening--${phase}`} data-testid="opening" data-phase={phase} style={openingPaletteStyle as CSSProperties} aria-label="专属生日序章">
     <div className="opening-nebula" aria-hidden="true"/>
     <canvas ref={canvas} className="opening-canvas" aria-hidden="true" onPointerMove={e=>{engine.current?.move(e.clientX,e.clientY);}} onPointerLeave={()=>engine.current?.move(0,0,false)} onPointerDown={e=>{engine.current?.move(e.clientX,e.clientY);engine.current?.bloom(e.clientX,e.clientY);}} onPointerUp={e=>{if(e.pointerType!=='mouse')engine.current?.move(0,0,false);}} onPointerCancel={()=>engine.current?.move(0,0,false)}/>
     <div className="opening-frame" aria-hidden="true"/>

@@ -26,3 +26,9 @@
 @media(prefers-reduced-motion:reduce){.opening-primary,.birthday .reveal-button,.close-button,.viewer-navigation button,.memory-progress i{transition:none}}
 
 .photo-arrival{cursor:grab}.photo-arrival:active{cursor:grabbing}
+
+/* Dream colors sampled from the cake, surrounding rather than tinting the white words. */
+.opening-nebula{background:radial-gradient(ellipse at 24% 50%,var(--dream-blue-mist),transparent 48%),radial-gradient(ellipse at 77% 51%,var(--dream-pink-mist),transparent 46%),radial-gradient(ellipse at 51% 72%,var(--dream-violet-mist),transparent 49%),radial-gradient(ellipse at 29% 70%,var(--dream-mint-mist),transparent 33%),radial-gradient(ellipse at 72% 30%,var(--dream-gold-mist),transparent 36%),linear-gradient(#010204,#030409 72%,#010204)}
+.opening-primary:before{background:var(--dream-spectrum);left:17%;right:17%;opacity:.85}
+.opening-primary{background:linear-gradient(125deg,#41c9ed12,#0c1019 38%,#ffa1c80d);box-shadow:inset 0 1px 0 #ffffff13,0 10px 36px #b481ef0a}
+.opening-frame{border-color:#d2c8e313}

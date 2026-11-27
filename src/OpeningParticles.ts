@@ -1,3 +1,4 @@
+import { dreamPalette, cakePalette } from './DreamPalette';
 import { drawSpectralHalo } from './SpectralHalo';
 import { randomGenerator } from './motion';
 
@@ -75,7 +76,7 @@ export class OpeningParticles {
   move(x:number,y:number,active=true){this.pointer={x,y,active};}
   bloom(x:number,y:number){
     if(this.reduced)return;
-    for(let i=0;i<70;i++){const angle=this.rng()*Math.PI*2,speed=30+this.rng()*100,life=.7+this.rng()*1.2;this.sparks.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,life,max:life,color:Math.floor(this.rng()*3)});}
+    for(let i=0;i<70;i++){const angle=this.rng()*Math.PI*2,speed=30+this.rng()*100,life=.7+this.rng()*1.2;this.sparks.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,life,max:life,color:Math.floor(this.rng()*dreamPalette.length)});}
     if(this.sparks.length>650)this.sparks.splice(0,this.sparks.length-650);
   }
   private draw=(now:number)=>{
@@ -89,10 +90,10 @@ export class OpeningParticles {
       const drift=this.reduced?0:5+star.z*7;
       const x=star.x*w+Math.sin(t*.22+star.x*30)*drift,y=star.y*h+Math.cos(t*.18+star.y*30)*drift;
       ctx.globalAlpha=.12+star.z*.32+Math.sin(t*(.6+star.z)+star.x*60)*.11;
-      ctx.fillStyle=star.z>.5?'#b7cfff':'#f8cbdf';ctx.beginPath();ctx.arc(x,y,.4+star.z*.8,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=dreamPalette[Math.min(dreamPalette.length-1,Math.floor(star.z*dreamPalette.length))];ctx.beginPath();ctx.arc(x,y,.4+star.z*.8,0,Math.PI*2);ctx.fill();
     }
     ctx.globalAlpha=1;
-    const glow=ctx.createRadialGradient(cx,cy,0,cx,cy,size*.62);glow.addColorStop(0,this.shape==='heart'?'#a6366817':'#527cdc14');glow.addColorStop(1,'#11132c00');ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
+    const glow=ctx.createRadialGradient(cx,cy,0,cx,cy,size*.62);glow.addColorStop(0,this.shape==='heart'?cakePalette[1]+'23':cakePalette[5]+'20');glow.addColorStop(1,'#11132c00');ctx.fillStyle=glow;ctx.fillRect(0,0,w,h);
     const orbit=this.shape==='orbit';const lettering=['3','2','1','name','birthday'].includes(this.shape);const fading=this.shape==='burst'?Math.max(0,1-(this.burstAge-.7)/1.5):1;
     drawSpectralHalo(ctx,cx,cy,size*.36,t,orbit ? .86 : this.shape==='burst' ? .36*fading : lettering ? .12 : .18,orbit);
     // One soft glow layer is cheaper and clearer than per-particle canvas shadows.
@@ -117,21 +118,21 @@ export class OpeningParticles {
       const shimmer=this.reduced?1:.62+Math.sin(t*(1.05+this.depths[i]*.65)+this.phases[i])*.25+Math.sin(t*.63+this.phases[i]*2.1)*.13;
       const radius=(.5+this.depths[i]*.85)*perspective*(.85+shimmer*.25);
       ctx.globalAlpha=(.32+this.depths[i]*.54)*shimmer*fading;
-      ctx.fillStyle=lettering?(i%4===0?'#e4ebf8':'#ffffff'):this.shape==='heart'?(i%3?'#ffc7e0':'#b8c9ff'):(i%3===0?'#f5bad6':i%3===1?'#c9b4f4':'#aed3f2');
+      ctx.fillStyle=lettering?(i%4===0?'#e4ebf8':'#ffffff'):this.shape==='heart'?(i%4?dreamPalette[1]:dreamPalette[i%dreamPalette.length]):dreamPalette[i%dreamPalette.length];
       ctx.beginPath();ctx.arc(x,y,Math.max(.3,radius),0,Math.PI*2);ctx.fill();
       if(i%19===0){
-        const alpha=ctx.globalAlpha;ctx.globalAlpha=alpha*.09;ctx.beginPath();ctx.arc(x,y,radius*7,0,Math.PI*2);ctx.fill();
+        const alpha=ctx.globalAlpha;ctx.fillStyle=dreamPalette[i%dreamPalette.length];ctx.globalAlpha=alpha*.12;ctx.beginPath();ctx.arc(x,y,radius*7,0,Math.PI*2);ctx.fill();
         ctx.globalAlpha=alpha*.18;ctx.beginPath();ctx.arc(x,y,radius*3.5,0,Math.PI*2);ctx.fill();
         if(shimmer>.74){ctx.globalAlpha=alpha*(shimmer-.65);ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(x-radius*4,y);ctx.lineTo(x+radius*4,y);ctx.moveTo(x,y-radius*5);ctx.lineTo(x,y+radius*5);ctx.stroke();}
       }
     }
     if(orbit){
       const a=t*.35;for(let i=0;i<2;i++){const angle=a+i*Math.PI,x=cx+Math.cos(angle)*size*.33,y=cy+Math.sin(angle)*size*.29;
-        const halo=ctx.createRadialGradient(x,y,0,x,y,24);halo.addColorStop(0,i?'#ffd4ebff':'#d4f4ffff');halo.addColorStop(.12,i?'#ffa3d0bb':'#a9daffbb');halo.addColorStop(1,'#aabbff00');ctx.globalAlpha=1;ctx.fillStyle=halo;ctx.fillRect(x-24,y-24,48,48);
+        const halo=ctx.createRadialGradient(x,y,0,x,y,24);const color=dreamPalette[i?1:4];halo.addColorStop(0,'#fffffff0');halo.addColorStop(.12,color+'d0');halo.addColorStop(.45,color+'44');halo.addColorStop(1,color+'00');ctx.globalAlpha=1;ctx.fillStyle=halo;ctx.fillRect(x-24,y-24,48,48);
       }
     }
     if(this.shape==='burst'&&!this.reduced){this.sparkClock+=dt;if(this.sparkClock>.38&&this.burstAge<1.4){this.sparkClock=0;this.bloom(w*(.18+this.rng()*.64),h*(.2+this.rng()*.4));}}
-    for(const s of this.sparks){s.life-=dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.vx*=Math.exp(-dt*.65);s.vy+=18*dt;ctx.globalAlpha=Math.max(0,s.life/s.max)*.8;ctx.strokeStyle=['#bde6ff','#ffd0e6','#dec7ff'][s.color];ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x-s.vx*.025,s.y-s.vy*.025);ctx.stroke();}
+    for(const s of this.sparks){s.life-=dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.vx*=Math.exp(-dt*.65);s.vy+=18*dt;ctx.globalAlpha=Math.max(0,s.life/s.max)*.8;ctx.strokeStyle=dreamPalette[s.color];ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x-s.vx*.025,s.y-s.vy*.025);ctx.stroke();}
     this.sparks=this.sparks.filter(s=>s.life>0);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
   };
   dispose(){cancelAnimationFrame(this.raf);this.observer.disconnect();this.sparks=[];this.cache.clear();}

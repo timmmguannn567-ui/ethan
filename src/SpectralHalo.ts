@@ -1,6 +1,8 @@
+import { spectralPalette } from './DreamPalette';
+
 /** Procedural obsidian / spectral light: no raster asset or remote request. */
 export function drawSpectralHalo(ctx:CanvasRenderingContext2D,cx:number,cy:number,r:number,time:number,intensity=1,chrome=true){
-  const colors=['#46dfff','#3764ff','#8156ff','#e12da7','#ff4d52','#ff9d39','#f4d866','#60dcbf'];
+  const colors=spectralPalette;
   ctx.save();ctx.translate(cx,cy);ctx.rotate(-.26);ctx.scale(1,.88);
   // An almost black, reflective shell leaves the center empty for the particles.
   if(chrome){
@@ -12,21 +14,28 @@ export function drawSpectralHalo(ctx:CanvasRenderingContext2D,cx:number,cy:numbe
     ctx.strokeStyle='#707e8d44';ctx.beginPath();ctx.arc(0,0,r*.935,Math.PI*.16,Math.PI*.82);ctx.stroke();
   }
   ctx.globalCompositeOperation='lighter';
+  // Cake-colored reflected light blooms softly over the chrome and surrounding void.
+  for(let i=0;i<colors.length;i++){
+    const a=i/colors.length*Math.PI*2+time*.035,x=Math.cos(a)*r*.86,y=Math.sin(a)*r*.86;
+    const glow=ctx.createRadialGradient(x,y,0,x,y,r*.6);
+    glow.addColorStop(0,colors[i]+'38');glow.addColorStop(.4,colors[i]+'16');glow.addColorStop(1,colors[i]+'00');
+    ctx.globalAlpha=intensity;ctx.fillStyle=glow;ctx.fillRect(x-r*.6,y-r*.6,r*1.2,r*1.2);
+  }
   // Layered open arcs form a colored light ribbon, with a restrained glow pass.
   for(let i=0;i<30;i++){
     const radius=r*(.72+i*.0064),offset=Math.sin(i*2.7)*.035;
     const start=.16+offset+Math.sin(time*.15+i*.2)*.06,end=Math.PI*1.94+offset;
     ctx.strokeStyle=colors[i%colors.length];ctx.lineCap='round';
-    ctx.globalAlpha=intensity*(.28+(i%4)*.12);ctx.lineWidth=i%6===0?1.45:.7;
+    ctx.globalAlpha=intensity*(.38+(i%4)*.13);ctx.lineWidth=i%6===0?1.45:.7;
     ctx.beginPath();ctx.arc(0,0,radius,start,end);ctx.stroke();
-    if(i%5===0){ctx.globalAlpha=intensity*.045;ctx.lineWidth=5;ctx.stroke();}
+    if(i%5===0){ctx.globalAlpha=intensity*.08;ctx.lineWidth=8;ctx.stroke();}
     // Small moving highlights suggest light travelling through the ring.
     if(i%3===0){const a=(time*.12+i*.69)%(Math.PI*2);ctx.globalAlpha=intensity*.7;ctx.lineWidth=.8;ctx.beginPath();ctx.arc(0,0,radius,a,a+.12);ctx.stroke();}
   }
   // Sparse strands escape the right edge, echoing a spectral long exposure.
   for(let i=0;i<9;i++){
     const y=(-.65+i*.155)*r,x=Math.sqrt(Math.max(0,r*r-y*y))*.92;
-    ctx.globalAlpha=intensity*.14;ctx.strokeStyle=colors[i%8];ctx.lineWidth=.6;
+    ctx.globalAlpha=intensity*.14;ctx.strokeStyle=colors[i%colors.length];ctx.lineWidth=.6;
     ctx.beginPath();ctx.moveTo(x,y);ctx.bezierCurveTo(x+r*.25,y-r*.06,x+r*.3,y-r*.12,x+r*.9,y-r*.12);ctx.stroke();
   }
   ctx.globalCompositeOperation='source-over';
